@@ -1,0 +1,9 @@
+/* Background.module.css */
+.background {
+    background-image: url('../assets/walter&jesse.jpg'); /* Adjust the path */
+    background-size: cover;
+    background-position: center;
+    width: 100vw;
+    height: 100vh;
+  }
+  
