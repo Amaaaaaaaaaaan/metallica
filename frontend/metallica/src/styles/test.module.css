@@ -1,0 +1,98 @@
+/* Container that holds everything */
+.gridContainer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    min-height: 100vh;
+    background-color: black;
+    color: white;
+  }
+  
+  /* Title styling */
+  .title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  /* The large bordered box that will highlight corners */
+  .bigBorder {
+    position: relative;
+    width: fit-content; /* Adjust to your layout needs */
+    padding: 1rem;
+    border: 2px solid #555; /* Gray border */
+    border-radius: 10px;
+  }
+  
+  /* Pseudo-element for corner highlighting */
+  .bigBorder::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 2px solid transparent; /* We'll color corners via class */
+    border-radius: 10px;
+    pointer-events: none;
+    transition: border-color 0.2s;
+  }
+  
+  /* Corner highlight classes */
+  .topLeft::before {
+    border-top-color: #ff4d94; /* Pinkish highlight */
+    border-left-color: #ff4d94;
+  }
+  
+  .topRight::before {
+    border-top-color: #ff4d94;
+    border-right-color: #ff4d94;
+  }
+  
+  .bottomLeft::before {
+    border-bottom-color: #ff4d94;
+    border-left-color: #ff4d94;
+  }
+  
+  .bottomRight::before {
+    border-bottom-color: #ff4d94;
+    border-right-color: #ff4d94;
+  }
+  
+  /* Grid for the selectable items */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  
+  /* Individual items (music styles) */
+  .item {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 8px;
+    text-align: center;
+    background-color: #1f1f1f;
+    color: #ccc;
+    border: 1px solid transparent;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .item:hover {
+    border-color: #ff4d94; /* Pinkish highlight on hover */
+  }
+  
+  /* Selected item style */
+  .selected {
+    background-color: #ff4d94;
+    color: white;
+  }
+  
+  /* Prompt text styling */
+  .prompt {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+  }
+  

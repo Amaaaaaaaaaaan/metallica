@@ -38,26 +38,26 @@ function MusicGenerator() {
   };
 
   return (
-    <div style={{ textAlign: "center", padding: "20px" }}>
-      <h1>METALLICA AI MUSIC GENERATOR</h1>
-      <h3>No musical experience? No problem! We've got everything you need to create amazing tunes!</h3>
+    <div style={styles.container}>
+      <h1 style={styles.title}>METALLICA AI MUSIC GENERATOR</h1>
+      <h3 style={styles.subtitle}>No musical experience? No problem! We've got everything you need to create amazing tunes!</h3>
 
       <input
         type="text"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         placeholder="Enter music description"
-        style={{ padding: "10px", width: "300px", marginRight: "10px" }}
+        style={styles.input}
       />
-      <button onClick={generateMusic} style={{ padding: "10px 20px" }}>
+      <button onClick={generateMusic} style={styles.button}>
         {loading ? "Generating..." : "Generate Music"}
       </button>
 
-      {loading && <div style={{ marginTop: "10px", color: "red" }}>Generating music, please wait...</div>}
+      {loading && <div style={styles.loading}>Generating music, please wait...</div>}
 
       {audioUrl && (
-        <div style={{ marginTop: "20px" }}>
-          <audio controls autoPlay>
+        <div style={styles.audioContainer}>
+          <audio controls autoPlay style={styles.audio}>
             <source src={audioUrl} type="audio/mpeg" />
             Your browser does not support the audio element.
           </audio>
@@ -66,5 +66,56 @@ function MusicGenerator() {
     </div>
   );
 }
+
+const styles = {
+  container: {
+    textAlign: "center",
+    padding: "20px",
+    backgroundColor: "#f0f0f0",
+    borderRadius: "10px",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    maxWidth: "600px",
+    margin: "auto",
+    marginTop: "50px",
+  },
+  title: {
+    fontSize: "2.5em",
+    color: "#333",
+  },
+  subtitle: {
+    fontSize: "1.2em",
+    color: "#666",
+    marginBottom: "20px",
+  },
+  input: {
+    padding: "10px",
+    width: "300px",
+    marginRight: "10px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+  },
+  button: {
+    padding: "10px 20px",
+    borderRadius: "5px",
+    border: "none",
+    backgroundColor: "#007bff",
+    color: "#fff",
+    cursor: "pointer",
+    transition: "background-color 0.3s",
+  },
+  buttonHover: {
+    backgroundColor: "#0056b3",
+  },
+  loading: {
+    marginTop: "10px",
+    color: "red",
+  },
+  audioContainer: {
+    marginTop: "20px",
+  },
+  audio: {
+    width: "100%",
+  },
+};
 
 export default MusicGenerator;

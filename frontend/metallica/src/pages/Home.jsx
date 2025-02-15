@@ -1,26 +1,61 @@
-import React, { Suspense, useState } from 'react';
-import { useMotionValue } from 'framer-motion';
-import Button from '../components/Button';
-import useMeasure from 'react-use-measure';
-import styles from '../styles/home.module.css'
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom';
+import { handleError, handleSuccess } from '../utils';
+import { ToastContainer } from 'react-toastify';
+
 function Home() {
-  const [ref, bounds] = useMeasure({ scroll: false });
-  const [isHover, setIsHover] = useState(false);
-  const [isPress, setIsPress] = useState(false);
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
+    const [loggedInUser, setLoggedInUser] = useState('');
+    const [products, setProducts] = useState('');
+    const navigate = useNavigate();
+    useEffect(() => {
+        setLoggedInUser(localStorage.getItem('loggedInUser'))
+    }, [])
 
-  const resetMousePosition = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-  };
+    const handleLogout = (e) => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('loggedInUser');
+        handleSuccess('User Loggedout');
+        setTimeout(() => {
+            navigate('/login');
+        }, 1000)
+    }
 
-  return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>HomePage</h1>
-      <Button />
-    </div>
-  );
+    const fetchProducts = async () => {
+        try {
+            const url = "https://deploy-mern-app-1-api.vercel.app/products";
+            const headers = {
+                headers: {
+                    'Authorization': localStorage.getItem('token')
+                }
+            }
+            const response = await fetch(url, headers);
+            const result = await response.json();
+            console.log(result);
+            setProducts(result);
+        } catch (err) {
+            handleError(err);
+        }
+    }
+    useEffect(() => {
+        fetchProducts()
+    }, [])
+
+    return (
+        <div>
+            <h1>Welcome {loggedInUser}</h1>
+            <button onClick={handleLogout}>Logout</button>
+            <div>
+                {
+                    products && products?.map((item, index) => (
+                        <ul key={index}>
+                            <span>{item.name} : {item.price}</span>
+                        </ul>
+                    ))
+                }
+            </div>
+            <ToastContainer />
+        </div>
+    )
 }
 
-export default Home;
+export default Home
