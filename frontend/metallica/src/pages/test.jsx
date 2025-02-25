@@ -1,11 +1,13 @@
+
 import React, { useState } from "react";
 import styles from "../styles/test.module.css"; // Import the CSS module
+import MusicGenerator from "./Musicgen"; // Import the MusicGenerator component
+import Button from "../components/Button"; // Import the custom Button component
 
 const musicStyles = ["Pop", "Rock", "Hip Hop", "R&B", "Electronic", "Jazz", "Reggae"];
 
 function PromptSelector() {
   const [selected, setSelected] = useState([]);
-  // This state tracks which corner to highlight
   const [activeCorner, setActiveCorner] = useState("");
 
   const toggleSelection = (style) => {
@@ -14,7 +16,6 @@ function PromptSelector() {
     );
   };
 
-  // Detect mouse position within the .bigBorder container
   const handleMouseMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -22,7 +23,6 @@ function PromptSelector() {
     const width = rect.width;
     const height = rect.height;
 
-    // Determine which quadrant the mouse is in
     if (x < width / 2 && y < height / 2) {
       setActiveCorner(styles.topLeft);
     } else if (x >= width / 2 && y < height / 2) {
@@ -34,7 +34,6 @@ function PromptSelector() {
     }
   };
 
-  // Reset highlight when mouse leaves
   const handleMouseLeave = () => {
     setActiveCorner("");
   };
@@ -66,6 +65,11 @@ function PromptSelector() {
       <div className={styles.prompt}>
         <strong>Your Prompt:</strong> {selected.join(", ") || "None"}
       </div>
+
+      {/* Add the MusicGenerator component and pass the selected styles as a prop */}
+      <MusicGenerator selectedStyles={selected.join(", ")} />
+
+      {/* Add a custom button with reduced text size */}
     </div>
   );
 }

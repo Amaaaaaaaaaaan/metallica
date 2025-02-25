@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Button from "../components/Button"; // Import the custom Button component
 
-function MusicGenerator() {
+function MusicGenerator({ selectedStyles }) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
+
+  useEffect(() => {
+    setPrompt(selectedStyles);
+  }, [selectedStyles]);
 
   const generateMusic = async () => {
     if (!prompt) {
@@ -49,9 +54,11 @@ function MusicGenerator() {
         placeholder="Enter music description"
         style={styles.input}
       />
-      <button onClick={generateMusic} style={styles.button}>
-        {loading ? "Generating..." : "Generate Music"}
-      </button>
+      <div style={styles.buttonContainer}>
+        <Button onClick={generateMusic} label="Generate" className={styles.generateButton}>
+          {loading ? "Generating..." : "Generate"}
+        </Button>
+      </div>
 
       {loading && <div style={styles.loading}>Generating music, please wait...</div>}
 
@@ -71,50 +78,72 @@ const styles = {
   container: {
     textAlign: "center",
     padding: "20px",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#121212", // Black background
     borderRadius: "10px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    boxShadow: "0 4px 15px rgba(255, 77, 148, 0.6)", // Pinkish-purple glow
     maxWidth: "600px",
     margin: "auto",
     marginTop: "50px",
   },
   title: {
     fontSize: "2.5em",
-    color: "#333",
+    color: "#FF4D94", // Pinkish-purple
+    fontWeight: "bold",
   },
   subtitle: {
     fontSize: "1.2em",
-    color: "#666",
+    color: "#FF4D94", // Pinkish-purple
     marginBottom: "20px",
   },
   input: {
-    padding: "10px",
-    width: "300px",
-    marginRight: "10px",
-    borderRadius: "5px",
-    border: "1px solid #ccc",
+    padding: "12px",
+    width: "90%",
+    borderRadius: "8px",
+    border: "2px solid #FF4D94", // Pinkish-purple border
+    backgroundColor: "#222",
+    color: "#fff",
+    fontSize: "16px",
+    outline: "none",
+    marginBottom: "10px",
+  },
+  buttonContainer: {
+    marginTop: "20px",
+    display: "flex",
+    justifyContent: "center",
+  },
+  generateButton: {
+    width: "100%",
+    maxWidth: "300px",
   },
   button: {
-    padding: "10px 20px",
-    borderRadius: "5px",
+    padding: "12px 25px",
+    borderRadius: "8px",
     border: "none",
-    backgroundColor: "#007bff",
+    backgroundColor: "#FF4D94",
     color: "#fff",
     cursor: "pointer",
-    transition: "background-color 0.3s",
+    fontSize: "18px",
+    fontWeight: "bold",
+    transition: "0.3s",
   },
   buttonHover: {
-    backgroundColor: "#0056b3",
+    backgroundColor: "#E60073", // Slightly darker shade on hover
   },
   loading: {
     marginTop: "10px",
-    color: "red",
+    color: "#FF4D94", // Pinkish-purple for loading text
+    fontWeight: "bold",
   },
   audioContainer: {
     marginTop: "20px",
+    padding: "10px",
+    backgroundColor: "#222",
+    borderRadius: "8px",
+    boxShadow: "0 2px 10px rgba(255, 77, 148, 0.3)", // Subtle glow
   },
   audio: {
     width: "100%",
+    borderRadius: "5px",
   },
 };
 
