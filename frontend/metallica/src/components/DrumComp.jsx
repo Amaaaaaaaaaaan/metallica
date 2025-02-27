@@ -1,9 +1,9 @@
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Environment, OrbitControls, useGLTF, useAnimations } from '@react-three/drei';
 import styles from './DrumStyle.module.css';
 
-// ✅ Corrected sound file paths
+// ✅ Map keys to corresponding sound files
 const SOUND_MAP = {
   w: '../../public/audios/bass_drum.mp3',
   a: '../../public/audios/bottom_left_hat.mp3',
@@ -15,7 +15,7 @@ const SOUND_MAP = {
   t: '../../public/audios/right_Cymbal.mp3'
 };
 
-function DrumsModel({ playAnimation }) {
+function DrumsModel({ isPlaying }) {
   const { scene, animations } = useGLTF('../../public/Drums.gltf');
   const { actions } = useAnimations(animations, scene);
 
@@ -23,39 +23,59 @@ function DrumsModel({ playAnimation }) {
     if (actions && animations.length > 0) {
       const action = actions[animations[0].name];
 
-      if (playAnimation) {
-        if (action && !action.isPlaying) { // ✅ Ensuring animation does not restart
-          action.play();
+      if (isPlaying) {
+        if (action && !action.isPlaying) {
+          action.play(); // ✅ Keep animation playing
         }
       } else {
-        action?.stop(); // ✅ Stop animation when playAnimation is false
+        action?.stop(); // ✅ Stop animation when inactive
       }
     }
-  }, [playAnimation, actions, animations]);
+  }, [isPlaying, actions, animations]);
 
   return <primitive object={scene} scale={50} position={[0, -1, 0]} />;
 }
 
 function DrumComp() {
   const [isAnimating, setIsAnimating] = useState(false);
+  const activeKeys = useRef(new Set());
+  const inactivityTimer = useRef(null);
 
   useEffect(() => {
-    const handleKeyPress = (event) => {
+    const handleKeyDown = (event) => {
       const key = event.key.toLowerCase();
       if (SOUND_MAP[key]) {
-        setIsAnimating(true);
+        activeKeys.current.add(key);
+        setIsAnimating(true); // ✅ Start animation when a key is pressed
 
-        // ✅ Play sound without stopping others
+        // ✅ Play multiple sounds simultaneously
         const audio = new Audio(SOUND_MAP[key]);
         audio.play();
 
-        // ✅ Keep animation running for a short duration
-        setTimeout(() => setIsAnimating(false), 3000);
+        // ✅ Reset inactivity timer
+        clearTimeout(inactivityTimer.current);
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    const handleKeyUp = (event) => {
+      const key = event.key.toLowerCase();
+      activeKeys.current.delete(key);
+
+      // ✅ If no keys are pressed, stop animation after delay
+      if (activeKeys.current.size === 0) {
+        inactivityTimer.current = setTimeout(() => {
+          setIsAnimating(false);
+        }, 1000);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
   }, []);
 
   return (
@@ -65,7 +85,7 @@ function DrumComp() {
           <Suspense fallback={null}>
             <ambientLight intensity={0.6} />
             <directionalLight position={[2, 2, 2]} intensity={1} />
-            <DrumsModel playAnimation={isAnimating} />
+            <DrumsModel isPlaying={isAnimating} />
             <OrbitControls />
             <Environment preset="sunset" />
           </Suspense>
