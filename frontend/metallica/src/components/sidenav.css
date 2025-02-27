@@ -7,7 +7,7 @@
     --bg-secondary: #141418;
     --transition-speed: 600ms;
   }
-  
+
   body {
     color: black;
     background-color: white;
@@ -37,9 +37,10 @@
     top: 0; /* Start at the top of the page */
     left: 0; /* Aligns the navbar to the left of the page */
     background-color: var(--bg-primary); /* Background color */
-    transition: width var(--transition-speed) ease; /* Smooth width transition */
+    transition: width var(--transition-speed) ease, filter var(--transition-speed) ease; /* Smooth width transition */
     width: 5rem; /* Default collapsed width */
     height: 100vh; /* Full viewport height */
+    z-index: 1000; /* Ensure it is above other components */
   }
   
   .navbar-nav {
@@ -79,8 +80,18 @@
   .link-text {
     display: none;
     margin-left: 1rem;
-  }
-  
+}
+
+.navbar:hover .link-text {
+    display: inline;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
   .nav-link svg {
     width: 2rem;
     min-width: 2rem;
@@ -155,7 +166,6 @@
     }
   }
   
-  /* Large screens */
   @media only screen and (min-width: 600px) {
     .navbar {
       top: 0;
@@ -181,6 +191,7 @@
       left: 0px;
     }
   }
+  
   
   .dark {
     --text-primary: #b6b6b6;

@@ -1,0 +1,11 @@
+.canvas {
+    height: 100vh !important;
+    width:800px;
+  }
+  .canvas-container {
+    width: 100vw;   /* Set width */
+    height: 100vh;  /* Set height */
+    margin: auto;   /* Center the canvas */
+    border: 2px solid red; /* Just for visibility */
+  }
+  

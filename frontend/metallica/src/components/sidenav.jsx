@@ -8,16 +8,7 @@ function Sidenav() {
   return (
     
     <><div>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <script defer src="theme.js"></script>
-        <link rel="stylesheet" href="style.css" />
-        <link
-          href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700&display=swap"
-          rel="stylesheet" />
-      </head>
-
-      <body>
+    
         <nav className="navbar">
           <ul className="navbar-nav">
             <li className="logo">
@@ -106,7 +97,7 @@ function Sidenav() {
                   </g>
                 </svg>
                 <span className="link-text">
-                  ABOUT US</span>
+                  HOME</span>
               </a>
             </li>
 
@@ -135,7 +126,7 @@ function Sidenav() {
                     ></path>
                   </g>
                 </svg>
-                <span className="link-text">INSTRUMENTS</span>
+                <span className="link-text">TOOL</span>
               </a>
             </li>
 
@@ -164,7 +155,7 @@ function Sidenav() {
                     ></path>
                   </g>
                 </svg>
-                <span className="link-text">CONTACT</span>
+                <span className="link-text">HOME</span>
               </a>
             </li>
 
@@ -249,7 +240,7 @@ function Sidenav() {
           </ul>
         </nav>
 
-      </body>
+    
     </div></>
 
   )
