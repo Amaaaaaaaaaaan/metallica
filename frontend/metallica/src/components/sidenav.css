@@ -82,10 +82,10 @@
     margin-left: 1rem;
 }
 
-.navbar:hover .link-text {
+/* .navbar:hover .link-text {
     display: inline;
     animation: fadeIn 0.3s ease-in-out;
-}
+} */
 
 @keyframes fadeIn {
     from { opacity: 0; }
@@ -137,12 +137,12 @@
     transition: var(--transition-speed);
   }
   
-  .navbar:hover .logo svg {
+  /* .navbar:hover .logo svg {
     transform: rotate(-180deg);
-  }
+  } */
   
   /* Small screens */
-  @media only screen and (max-width: 600px) {
+  /* @media only screen and (max-width: 600px) {
     .navbar {
       bottom: 0;
       width: 100vw;
@@ -192,7 +192,7 @@
     }
   }
   
-  
+   */
   .dark {
     --text-primary: #b6b6b6;
     --text-secondary: #ececec;

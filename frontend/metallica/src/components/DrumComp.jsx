@@ -2,10 +2,22 @@ import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Environment, OrbitControls, useGLTF, useAnimations } from '@react-three/drei';
 import styles from './DrumStyle.module.css';
+import { useThree } from '@react-three/fiber';
 
-// ✅ Map keys to corresponding sound files
-const SOUND_MAP = {
-  w: '../../public/audios/bass_drum.mp3',
+function CameraLogger() {
+  const { camera } = useThree();
+
+  useEffect(() => {
+    console.log("Camera Position:", camera.position);
+    console.log("Camera Rotation:", camera.rotation);
+  }, [camera]);
+
+  return null; // This component is just for logging
+}
+
+const PRESET_MAPPINGS = {
+  Default: {
+    w: '../../public/audios/bass_drum.mp3',
   a: '../../public/audios/bottom_left_hat.mp3',
   s: '../../public/audios/center_left_Drum.mp3',
   d: '../../public/audios/center_right_drum.mp3',
@@ -13,6 +25,17 @@ const SOUND_MAP = {
   e: '../../public/audios/left_bottom.mp3',
   r: '../../public/audios/right_bottom_Drum.mp3',
   t: '../../public/audios/right_Cymbal.mp3'
+  },
+  Alternative: {
+    w: '/audios/alternative_bass.mp3',
+    a: '/audios/alternative_hat.mp3',
+    s: '/audios/alternative_snare.mp3',
+    d: '/audios/alternative_tom.mp3',
+    q: '/audios/alternative_crash.mp3',
+    e: '/audios/alternative_ride.mp3',
+    r: '/audios/alternative_floor_tom.mp3',
+    t: '/audios/alternative_splash.mp3'
+  }
 };
 
 function DrumsModel({ isPlaying }) {
@@ -25,10 +48,10 @@ function DrumsModel({ isPlaying }) {
 
       if (isPlaying) {
         if (action && !action.isPlaying) {
-          action.play(); // ✅ Keep animation playing
+          action.play();
         }
       } else {
-        action?.stop(); // ✅ Stop animation when inactive
+        action?.stop();
       }
     }
   }, [isPlaying, actions, animations]);
@@ -38,21 +61,20 @@ function DrumsModel({ isPlaying }) {
 
 function DrumComp() {
   const [isAnimating, setIsAnimating] = useState(false);
+  const [keyMapping, setKeyMapping] = useState('Default');
   const activeKeys = useRef(new Set());
   const inactivityTimer = useRef(null);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       const key = event.key.toLowerCase();
-      if (SOUND_MAP[key]) {
+      if (PRESET_MAPPINGS[keyMapping][key]) {
         activeKeys.current.add(key);
-        setIsAnimating(true); // ✅ Start animation when a key is pressed
-
-        // ✅ Play multiple sounds simultaneously
-        const audio = new Audio(SOUND_MAP[key]);
+        setIsAnimating(true);
+        
+        const audio = new Audio(PRESET_MAPPINGS[keyMapping][key]);
         audio.play();
-
-        // ✅ Reset inactivity timer
+        
         clearTimeout(inactivityTimer.current);
       }
     };
@@ -61,7 +83,6 @@ function DrumComp() {
       const key = event.key.toLowerCase();
       activeKeys.current.delete(key);
 
-      // ✅ If no keys are pressed, stop animation after delay
       if (activeKeys.current.size === 0) {
         inactivityTimer.current = setTimeout(() => {
           setIsAnimating(false);
@@ -76,13 +97,19 @@ function DrumComp() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [keyMapping]);
 
   return (
     <>
       <div className={styles.canvasContainer}>
+        <select onChange={(e) => setKeyMapping(e.target.value)}>
+          {Object.keys(PRESET_MAPPINGS).map((preset) => (
+            <option key={preset} value={preset}>{preset}</option>
+          ))}
+        </select>
         <Canvas style={{ width: "800px", height: "100vh" }} className={styles.canvas} camera={{ position: [0, 2, 5], fov: 50 }}>
           <Suspense fallback={null}>
+            <CameraLogger />
             <ambientLight intensity={0.6} />
             <directionalLight position={[2, 2, 2]} intensity={1} />
             <DrumsModel isPlaying={isAnimating} />
