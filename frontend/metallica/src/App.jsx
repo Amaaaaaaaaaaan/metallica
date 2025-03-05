@@ -13,6 +13,7 @@ import RefrshHandler from './components/RefrshHandler'
 import Carousel from './components/Carousel'
 import Instruments from './pages/Instruments'
 import { DrumPlayer } from './pages/drumPlayer'
+import { KeyboardPlayer } from './pages/KeyboardPlay'
 function App() {
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -41,6 +42,8 @@ function App() {
   <Route path='/Music-Gen' element={<MusicGenerator/>}></Route>
   <Route path='/test' element={<PromptSelector/>}></Route>
   <Route path='/drums' element={<DrumPlayer/>}></Route>
+  <Route path='/piano' element={<KeyboardPlayer/>}></Route>
+
 </Routes>
 </div>
     </>
