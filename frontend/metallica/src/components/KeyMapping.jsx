@@ -1,16 +1,13 @@
 import React, { useState } from "react";
 
+const ALLOWED_KEYS = "abcdefghijklmnopqrstuvwxyz0123456789".split("");
+
 const KeyMapping = ({ soundMap, updateSoundMap }) => {
   const [newKeyMap, setNewKeyMap] = useState({ ...soundMap });
   const [error, setError] = useState("");
 
   const handleChange = (e, oldKey) => {
     const updatedKey = e.target.value.toLowerCase();
-    
-    if (!updatedKey.match(/^[a-z0-9]$/)) {
-      setError("Only letters and numbers are allowed.");
-      return;
-    }
 
     // Prevent duplicate key assignments
     if (Object.keys(newKeyMap).includes(updatedKey)) {
@@ -24,8 +21,8 @@ const KeyMapping = ({ soundMap, updateSoundMap }) => {
       const updatedMap = { ...prev };
       const soundFile = prev[oldKey];
 
-      delete updatedMap[oldKey]; // Remove old key binding
-      updatedMap[updatedKey] = soundFile; // Assign new key binding
+      delete updatedMap[oldKey];
+      updatedMap[updatedKey] = soundFile;
 
       return updatedMap;
     });
@@ -44,12 +41,13 @@ const KeyMapping = ({ soundMap, updateSoundMap }) => {
         <div key={key} style={{ marginBottom: "5px" }}>
           <label>
             {newKeyMap[key].split("/").pop()} - Press Key:{" "}
-            <input
-              type="text"
-              maxLength={1}
-              defaultValue={key}
-              onChange={(e) => handleChange(e, key)}
-            />
+            <select value={key} onChange={(e) => handleChange(e, key)}>
+              {ALLOWED_KEYS.map((allowedKey) => (
+                <option key={allowedKey} value={allowedKey}>
+                  {allowedKey.toUpperCase()}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
       ))}

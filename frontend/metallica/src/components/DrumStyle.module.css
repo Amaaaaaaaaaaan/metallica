@@ -1,67 +1,156 @@
-.canvas {
-  height: 100vh !important;
-  width: 1000px;
+/* DrumStyle.module.css */
+:root {
+  --bg-dark: #1c1c1c;       /* Dark stone background for the container */
+  --bg-panel: #2c2c2c;      /* Slightly lighter for panels */
+  --bg-box: #3a3a3a;        /* Inner box background */
+  --text-color: #eeeeee;
+  --accent: #ff6f61;
+  --border-radius: 10px;    
+  --canvas-radius: 20px;    /* Larger rounding for the canvas */
+  --shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --transition: 0.3s ease;
+  --small-text: 0.85rem;
+  --normal-text: 1rem;
 }
 
-.canvas-container {
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  justify-content: center; /* Center canvas */
-  align-items: center;
-  padding: 20px; /* Adds space around the container */
-}
-
-/* Main Layout */
 .container {
-  display: flex;
-  height: 100vh;
-  gap: 20px; /* Space between sections */
-  padding: 20px; /* Adds overall padding */
+  display: flex
+  ;
+      flex-direction: row;
+      width: 110%;
+      height: 100vh;
+      background-color: var(--bg-dark);
+      margin-right: 79px;
+      color: var(--text-color);
+      gap: 10px;
+      /* padding: 10px; */
+      /* padding-bottom: 30px; */
+      box-sizing: border-box;
 }
 
-/* Sidebar */
-.sidenav {
-  background-color: #1e1e1e;
-  min-width: 80px;
-}
-
-/* 🎸 Drum Section - Wider */
-.drumSection {
-  width: 55%; /* ✅ Increased width */
+/* Canvas container now uses a reduced height and centers its content */
+/* Give the canvas about 40% width */
+.canvasContainer {
+  flex: 5;
   display: flex;
-  justify-content: center;
   align-items: center;
-  background-color: #222;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+  justify-content: center;
+  background-color: #000;
+  /* border-radius: var(--canvas-radius); */
+  box-shadow: var(--shadow);
+  height: 100% ;
+  overflow: hidden;
+  /* Remove height: 80% and margin: auto if you want it to fill full height */
 }
 
-/* Extra Options - Less Spacing */
-.extraOptions {
-  width: 40%; /* ✅ Reduced width */
+/* Give the controls about 60% width */
+.controls {
+  flex: 3;
+  background-color: var(--bg-panel);
+  /* border-radius: var(--border-radius); */
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+/* The canvas itself remains the same */
+.canvas {
+  width: 90%;
+  max-width: 800px;
+  height: 100%;           /* Canvas fills the container's height */
+  border-radius: var(--canvas-radius);
+  display: block;
+}
+
+/* 30% for the controls */
+/* 
+/* Common panel styling for preset selector, volume, key mapping, etc. */
+.presetSelector,
+.volumeControls,
+.keyMappingContainer {
+  background-color: var(--bg-box);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  padding: 19px;
+}
+
+/* Preset Selector */
+.presetSelector label {
+  display: block;
+  font-size: var(--normal-text);
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.presetSelector select {
+  width: 100%;
+  padding: 8px;
+  border-radius: var(--border-radius);
+  border: none;
+  font-size: var(--normal-text);
+  outline: none;
+  transition: transform var(--transition);
   background-color: #2a2a2a;
-  margin-left: 40px; /* ✅ Less space */
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+  color: var(--text-color);
 }
 
-/* Responsive Adjustments */
-@media (max-width: 1200px) {
-  .container {
-    flex-direction: column;
-    align-items: center;
-  }
+.presetSelector select:hover {
+  transform: scale(1.02);
+}
 
-  .drumSection, .extraOptions {
-    width: 80%;
-    margin: 10px 0;
-  }
+/* Volume Controls */
+.volumeControls label {
+  font-size: var(--normal-text);
+  font-weight: bold;
+  margin-bottom: 5px;
+}
 
-  .sidenav {
-    width: 100%;
-    height: 60px;
-  }
+.volumeControls button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+   border-radius: var(--border-radius);
+  border: none;
+  background-color: var(--accent);
+  color: #fff;
+  font-size: var(--normal-text);
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.volumeControls button:hover {
+  background-color: #ff8478;
+  transform: scale(1.02);
+}
+
+.volumeControls button:active {
+  transform: scale(0.98);
+}
+
+/* Key Mapping Container */
+.keyMappingContainer {
+  font-size: var(--small-text);
+}
+
+.keyMappingContainer h3 {
+  margin-bottom: 10px;
+}
+
+.keyMappingContainer label {
+  font-size: var(--small-text);
+  margin-bottom: 3px;
+  display: inline-block;
+}
+
+.keyMappingContainer select {
+  width: 80px;
+  padding: 5px;
+  border-radius: var(--border-radius);
+  border: 1px solid #444;
+  font-size: var(--small-text);
+  margin-left: 5px;
+  background-color: #2a2a2a;
+  color: var(--text-color);
 }
