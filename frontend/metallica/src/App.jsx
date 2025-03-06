@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import Login from './pages/Login'
+import sidenav from './components/sidenav'
+import Signup from './pages/Signup'
 import Home from "./pages/home";
 import MusicGenerator from './pages/Musicgen'
 import PromptSelector from './pages/test'
@@ -9,23 +13,18 @@ import RefrshHandler from './components/RefrshHandler'
 import Carousel from './components/Carousel'
 import Instruments from './pages/Instruments'
 import { DrumPlayer } from './pages/drumPlayer'
+import { KeyboardPlayer } from './pages/KeyboardPlay'
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // Initially null to avoid flicker
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsAuthenticated(!!token); // Convert token presence to boolean
-    setLoading(false); // Stop loading after checking auth
-  }, []);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // PrivateRoute component to protect all private pages
-  const PrivateRoute = ({ children }) => {
-    if (loading) return null; // Wait until authentication is checked
-    return isAuthenticated ? children : <Navigate to="/login" />;
-  };
+  const PrivateRoute = ({ element }) => {
+    return isAuthenticated ? element : <Navigate to="/login" />
+  }
 
   return (
+    <>
+    
     <div className="App">
      
 <RefrshHandler setIsAuthenticated={setIsAuthenticated} />
@@ -43,6 +42,8 @@ function App() {
   <Route path='/Music-Gen' element={<MusicGenerator/>}></Route>
   <Route path='/test' element={<PromptSelector/>}></Route>
   <Route path='/drums' element={<DrumPlayer/>}></Route>
+  <Route path='/piano' element={<KeyboardPlayer/>}></Route>
+
 </Routes>
 </div>
     </>
