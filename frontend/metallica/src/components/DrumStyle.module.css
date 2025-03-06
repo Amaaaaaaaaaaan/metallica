@@ -1,72 +1,176 @@
-/* DrumStyle.module.css */
+/* --- Global Reset --- */
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  height: 100%; /* Ensures body stretches full height */
+}
+
+/* 
+  If you have other global styles, place them here or 
+  in your main index.css. 
+*/
+
+/* --- Root Variables --- */
 :root {
-  --bg-dark: #1c1c1c;       /* Dark stone background for the container */
-  --bg-panel: #2c2c2c;      /* Slightly lighter for panels */
-  --bg-box: #3a3a3a;        /* Inner box background */
+  --bg-dark: #1c1c1c;     /* Dark background for the container */
+  --bg-panel: #2c2c2c;    /* Slightly lighter for panels */
+  --bg-box: #3a3a3a;      /* Inner box background */
   --text-color: #eeeeee;
   --accent: #ff6f61;
-  --border-radius: 10px;    
-  --canvas-radius: 20px;    /* Larger rounding for the canvas */
+  --border-radius: 10px;
+  --canvas-radius: 20px;
   --shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
   --transition: 0.3s ease;
   --small-text: 0.85rem;
   --normal-text: 1rem;
 }
 
-.container {
-  display: flex
-  ;
-      flex-direction: row;
-      width: 110%;
-      height: 100vh;
-      background-color: var(--bg-dark);
-      margin-right: 79px;
-      color: var(--text-color);
-      gap: 10px;
-      /* padding: 10px; */
-      /* padding-bottom: 30px; */
-      box-sizing: border-box;
-}
-
-/* Canvas container now uses a reduced height and centers its content */
-/* Give the canvas about 40% width */
-.canvasContainer {
-  flex: 5;
+/* --- Generic Button Style --- */
+button {
+  background-color: var(--accent);
+  border-radius: 60px;
+  outline: none;
+  margin: 0;
+  padding: 12px 25px;
+  font-family: "Poppins", sans-serif;
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 48px;
+  letter-spacing: -1px;
+  position: relative;
+  text-align: center;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background-color: #000;
-  /* border-radius: var(--canvas-radius); */
-  box-shadow: var(--shadow);
-  height: 100% ;
-  overflow: hidden;
-  /* Remove height: 80% and margin: auto if you want it to fill full height */
+  cursor: pointer;
 }
 
-/* Give the controls about 60% width */
+/* --- Main Container --- */
+.container {
+  display: flex;
+  flex-direction: row;
+  width: 100vw;     /* Fill entire viewport width */
+  height: 100vh;    /* Fill entire viewport height */
+  background-color: var(--bg-dark);
+  color: var(--text-color);
+  /* No margin, no gap */
+  margin: 0;
+  padding: 0;
+  gap: 0;
+  box-sizing: border-box;
+}
+
+/* --- Canvas Container --- */
+.canvasContainer {
+  flex: 5;               /* Adjust ratio if you want the canvas bigger/smaller */
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  background-color: #000;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* --- The Canvas --- */
+.canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* border-radius: var(--canvas-radius);  // optional if you want rounded corners */
+}
+
+/* --- Controls Panel --- */
 .controls {
-  flex: 3;
+  flex: 3;                /* Adjust ratio as needed */
   background-color: var(--bg-panel);
-  /* border-radius: var(--border-radius); */
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 20px;
+  padding: 20px;          /* Reduce/increase to control spacing on the right */
 }
 
-/* The canvas itself remains the same */
-.canvas {
-  width: 90%;
-  max-width: 800px;
-  height: 100%;           /* Canvas fills the container's height */
-  border-radius: var(--canvas-radius);
-  display: block;
+/* --- Recording Buttons --- */
+.triangleButton {
+  width: 0;
+  height: 0;
+  border-left: 30px solid transparent;
+  border-right: 30px solid transparent;
+  border-bottom: 40px solid green;
+  background: transparent;
+  border: none;
 }
 
-/* 30% for the controls */
-/* 
-/* Common panel styling for preset selector, volume, key mapping, etc. */
+.redCircleButton {
+  width: 60px;
+  height: 60px;
+  background-color: red;
+  border-radius: 50%;
+  border: none;
+}
+
+/* --- Discard Button (for recordings) --- */
+.discardButton {
+  margin-left: 10px;
+  background-color: transparent;
+  border: none;
+  color: #d00;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+/* --- Scrollable Recordings Container --- */
+.recordingsScrollable {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 1rem;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: var(--bg-box);
+}
+
+/* Custom scrollbar for WebKit browsers */
+.recordingsScrollable::-webkit-scrollbar {
+  width: 8px;
+}
+
+.recordingsScrollable::-webkit-scrollbar-track {
+  border-radius: 8px;
+  background: #2c2c2c;
+}
+
+.recordingsScrollable::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 8px;
+}
+
+.recordingsScrollable::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Firefox scrollbar styling */
+.recordingsScrollable {
+  scrollbar-width: thin;
+  scrollbar-color: #bbb #2c2c2c;
+}
+
+/* Each recording row */
+.recordingItem {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* Empty State for recordings */
+.emptyMessage {
+  text-align: center;
+  color: #aaa;
+  padding: 20px 0;
+  font-style: italic;
+}
+
+/* --- Panels: Preset, Volume, Key Mapping, etc. --- */
 .presetSelector,
 .volumeControls,
 .keyMappingContainer {
@@ -111,7 +215,7 @@
   width: 100%;
   padding: 10px;
   margin-top: 5px;
-   border-radius: var(--border-radius);
+  border-radius: var(--border-radius);
   border: none;
   background-color: var(--accent);
   color: #fff;
@@ -153,4 +257,65 @@
   margin-left: 5px;
   background-color: #2a2a2a;
   color: var(--text-color);
+}
+
+/* --- Side Popup Key Mapping --- */
+.popupKeyMapping {
+  position: fixed;
+  right: -300px; /* Initially off-screen */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 250px;
+  background-color: var(--bg-box);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 15px;
+  transition: right var(--transition);
+  z-index: 1000;
+}
+
+.popupKeyMapping.show {
+  right: 0px; /* Slide in when active */
+}
+
+.popupKeyMapping h3 {
+  margin-bottom: 10px;
+  color: var(--text-color);
+  font-size: var(--normal-text);
+}
+
+.popupKeyMapping label {
+  font-size: var(--small-text);
+  margin-bottom: 5px;
+  display: block;
+  color: var(--text-color);
+}
+
+.popupKeyMapping select {
+  width: 100%;
+  padding: 5px;
+  border-radius: var(--border-radius);
+  border: 1px solid #444;
+  font-size: var(--small-text);
+  background-color: #2a2a2a;
+  color: var(--text-color);
+  outline: none;
+}
+
+/* Close Button */
+.popupKeyMapping .closeButton {
+  position: absolute;
+  top: 10px;
+  right: -10px;
+  background: none;
+  color: white;
+  border: none;
+  height: 24px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background var(--transition), font-size var(--transition);
+}
+
+.popupKeyMapping .closeButton:hover {
+  font-size: 18px;
 }
