@@ -16,6 +16,38 @@ function Loader() {
     "Almost there... 🔥"
   ];
 
+  function DrumsModel({ isPlaying }) {
+    const { scene, animations } = useGLTF("/keyboard.gltf");
+    const { actions } = useAnimations(animations, scene);
+  
+    // Log the model's position once the scene is loaded
+    useEffect(() => {
+      console.log("Drums model loaded. Position:", scene.position);
+    }, [scene]);
+  
+    useEffect(() => {
+      if (actions && animations.length > 0) {
+        const action = actions[animations[0].name];
+        if (isPlaying) {
+          if (action && !action.isPlaying) {
+            action.play();
+          }
+        } else {
+          action?.stop();
+        }
+      }
+    }, [isPlaying, actions, animations]);
+  
+    return (
+      <primitive
+        object={scene}
+        scale={5}
+        position={[0, 0, 0]}  // Adjust these values as needed
+        rotation={[0, 0, 0]}
+      />
+    );
+  }
+  
   const [message, setMessage] = useState(messages[0]);
 
   useEffect(() => {
