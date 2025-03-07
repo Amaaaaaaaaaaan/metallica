@@ -4,6 +4,8 @@ import { Environment, OrbitControls, useGLTF, useAnimations, useProgress, Html }
 import { TextureLoader } from "three";
 import styles from "./DrumStyle.module.css";
 import KeyMapping from "./KeyMapping";
+import * as THREE from 'three';
+import BackgroundPicker from "./BackgroundPicker";
 
 function Loader() {
   const { progress } = useProgress();
@@ -100,22 +102,30 @@ function DrumsModel({ isPlaying }) {
 }
 
 // This component updates the scene background with a texture from the selected image.
+
 function CanvasBackground({ bgImage }) {
   const { scene } = useThree();
 
   useEffect(() => {
     if (bgImage) {
-      new TextureLoader().load(bgImage, (texture) => {
-        scene.background = texture;
-      });
+      if (bgImage.type === "color") {
+        scene.background = new THREE.Color(bgImage.value);
+      } else if (bgImage.type === "image") {
+        new THREE.TextureLoader().load(bgImage.value, (texture) => {
+          texture.encoding = THREE.sRGBEncoding;
+          texture.minFilter = THREE.LinearFilter;
+          texture.magFilter = THREE.LinearFilter;
+          texture.anisotropy = 16;
+          scene.background = texture;
+        });
+      }
     } else {
-      scene.background = null; // Clear background if no image is selected
+      scene.background = null;
     }
   }, [bgImage, scene]);
 
   return null;
 }
-
 function DrumComp() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [keyMapping, setKeyMapping] = useState("Default");
@@ -124,19 +134,20 @@ function DrumComp() {
   const [isKeyMappingOpen, setIsKeyMappingOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordings, setRecordings] = useState([]);
-  const [bgImage, setBgImage] = useState(null); // State to hold background image data URL
+  // bgImage will be an object, for example: { type: "color", value: "#ff0000" } or { type: "image", value: "data:image/..." }
+  const [bgImage, setBgImage] = useState(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isRecordingActive, setIsRecordingActive] = useState(false);
 
   const activeKeys = useRef(new Set());
   const inactivityTimer = useRef(null);
 
-  // Setup AudioContext and MediaRecorder only once.
   const audioContextRef = useRef(null);
   const destRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
 
   useEffect(() => {
-    // Initialize AudioContext and MediaStreamDestination.
     audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
     destRef.current = audioContextRef.current.createMediaStreamDestination();
     try {
@@ -217,33 +228,33 @@ function DrumComp() {
       recordedChunksRef.current = [];
       mediaRecorderRef.current.start();
       setIsRecording(true);
+      setIsRecordingActive(true); // Show Pause Button
+    }
+  };
+
+  const pauseRecording = () => {
+    if (mediaRecorderRef.current) {
+      if (mediaRecorderRef.current.state === "recording") {
+        mediaRecorderRef.current.pause();
+        setIsPaused(true);
+      } else if (mediaRecorderRef.current.state === "paused") {
+        mediaRecorderRef.current.resume();
+        setIsPaused(false);
+      }
+      setIsRecordingActive(mediaRecorderRef.current.state === "recording");
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      setIsRecordingActive(false); // Reset to Start Button
     }
   };
 
-  // Discard a recorded audio by its index
   const discardRecording = (index) => {
-    setRecordings((prevRecordings) =>
-      prevRecordings.filter((_, idx) => idx !== index)
-    );
-  };
-
-  // Handle file input change to update the background image.
-  const handleBgChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setBgImage(e.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
+    setRecordings((prev) => prev.filter((_, idx) => idx !== index));
   };
 
   return (
@@ -252,44 +263,46 @@ function DrumComp() {
         <Canvas
           className={styles.canvas}
           camera={{
-            position: [-3.0235463847913526, 2.4680071247329516, -5.762152603378366],
-            fov: 50,
-            rotation: [-2.7369188843831083, -0.44942295148649, -2.957617815288093]
+            position: [0, 2, 10],
+            fov: 50
+          }}
+          gl={{
+            outputEncoding: THREE.sRGBEncoding,
+            toneMapping: THREE.ACESFilmicToneMapping,
+            toneMappingExposure: 0.8
           }}
         >
           <Suspense fallback={<Loader />}>
-            {/* Add the background component and pass the selected bgImage */}
             <CanvasBackground bgImage={bgImage} />
             <ambientLight intensity={0.6} />
-            <directionalLight position={[2, 2, 2]} intensity={1} />
-            <DrumsModel isPlaying={isAnimating} />
-            <OrbitControls enableZoom={false} enablePan={false} />
+            <hemisphereLight skyColor={"#aaaaaa"} groundColor={"#222222"} intensity={0.3} position={[0, 50, 0]} />
+            <directionalLight position={[5, 5, 5]} intensity={0.8} />
+            <DrumsModel isPlaying={isAnimating} activeKeys={activeKeys} />
+            <OrbitControls enableZoom={true} enablePan={true} />
             <Environment preset="sunset" />
           </Suspense>
         </Canvas>
       </div>
       <div className={styles.controls}>
-        <div className={styles.presetSelector}>
-          <label>Drum Presets:</label>
-          <select onChange={handlePresetChange} value={keyMapping}>
-            {Object.keys(PRESET_MAPPINGS).map((preset) => (
-              <option key={preset} value={preset}>
-                {preset}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className={styles.settingsContainer}>
+  <div className={styles.presetCard}>
+    <h4>Keyboard Preset</h4>
+    <label>Presets:</label>
+    <select onChange={handlePresetChange} value={keyMapping}>
+      {Object.keys(PRESET_MAPPINGS).map((preset) => (
+        <option key={preset} value={preset}>
+          {preset}
+        </option>
+      ))}
+    </select>
+  </div>
 
-        {/* Background Image Changer */}
-        <div className={styles.bgChanger}>
-          <label htmlFor="bg-input">Change Background:</label>
-          <input
-            id="bg-input"
-            type="file"
-            accept="image/*"
-            onChange={handleBgChange}
-          />
-        </div>
+  <div className={styles.backgroundCard}>
+    <h4>Background</h4>
+    <BackgroundPicker setBg={setBgImage} />
+  </div>
+</div>
+
 
         <button className={styles.keyMappingButton} onClick={() => setIsKeyMappingOpen(true)}>
           🎹 Configure Keys
@@ -308,27 +321,32 @@ function DrumComp() {
           <button onClick={() => adjustVolume(-0.1)}>🔉 Decrease</button>
           <button onClick={() => adjustVolume(0.1)}>🔊 Increase</button>
         </div>
-
         <div className={styles.recordingControls}>
-          <button 
-            onClick={startRecording} 
-            disabled={isRecording} 
-            className={styles.triangleButton}
-            title="Start Recording"
-          >
-            <span className="visually-hidden">Start Recording</span>
-          </button>
+          {isRecording ? (
+            <button 
+              onClick={pauseRecording} 
+              className={isPaused ? styles.triangleButton : styles.pauseButton}
+              title={isPaused ? "Resume Recording" : "Pause Recording"}
+            >
+            </button>
+          ) : (
+            <button 
+              onClick={startRecording} 
+              className={styles.triangleButton}
+              title="Start Recording"
+            >
+            </button>
+          )}
+
           <button 
             onClick={stopRecording} 
             disabled={!isRecording} 
             className={styles.redCircleButton}
             title="Stop Recording"
           >
-            <span className="visually-hidden">Stop Recording</span>
           </button>
         </div>
 
-        {/* Scrollable container for recorded audios */}
         <div className={styles.recordingsScrollable}>
           {recordings.length === 0 ? (
             <div className={styles.emptyMessage}>

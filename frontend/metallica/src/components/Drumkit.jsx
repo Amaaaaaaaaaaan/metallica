@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './Drumkit.css';
 import 'font-awesome/css/font-awesome.min.css';
-import { TimelineMax, Elastic, Expo } from 'gsap';
+import { gsap } from 'gsap';
 
 const SVGDrumKit = () => {
   const [sequencerVisible, setSequencerVisible] = useState(false);
@@ -25,95 +25,120 @@ const SVGDrumKit = () => {
   const hiHatClosedAudioRef = useRef(null);
 
   useEffect(() => {
-    const crashtl = new TimelineMax({ paused: true });
-    crashtl.to(crashCymbolRef.current, 0.1, {
+    // Crash Cymbal Animation
+    const crashtl = gsap.timeline({ paused: true });
+    crashtl.to(crashCymbolRef.current, {
+      duration: 0.1,
       rotation: 8,
       transformOrigin: "50% 50%"
-    }).to(crashCymbolRef.current, 1.5, {
+    }).to(crashCymbolRef.current, {
+      duration: 1.5,
       rotation: 0,
       transformOrigin: "50% 50%",
-      ease: Elastic.easeOut.config(2.5, 0.3)
+      ease: "elastic.out(2.5, 0.3)"
     });
 
-    const rightTomtl = new TimelineMax({ paused: true });
-    rightTomtl.to(rightTomDrumRef.current, 0.1, {
+    // Right Tom Drum Animation
+    const rightTomtl = gsap.timeline({ paused: true });
+    rightTomtl.to(rightTomDrumRef.current, {
+      duration: 0.1,
       scaleX: 1.04,
       transformOrigin: "50% 50%",
-      ease: Expo.easeOut
-    }).to(rightTomDrumRef.current, 0.1, {
+      ease: "expo.out"
+    }).to(rightTomDrumRef.current, {
+      duration: 0.1,
       scaleY: 0.95,
       transformOrigin: "50% 50%",
-      ease: Expo.easeOut
-    }, '0').to(rightTomDrumRef.current, 0.4, {
+      ease: "expo.out"
+    }, 0).to(rightTomDrumRef.current, {
+      duration: 0.4,
       scale: 1,
       transformOrigin: "50% 50%",
-      ease: Elastic.easeOut
+      ease: "elastic.out"
     });
 
-    const leftTomtl = new TimelineMax({ paused: true });
-    leftTomtl.to(leftTomDrumRef.current, 0.1, {
+    // Left Tom Drum Animation
+    const leftTomtl = gsap.timeline({ paused: true });
+    leftTomtl.to(leftTomDrumRef.current, {
+      duration: 0.1,
       scaleX: 1.04,
       transformOrigin: "50% 50%",
-      ease: Expo.easeOut
-    }).to(leftTomDrumRef.current, 0.1, {
+      ease: "expo.out"
+    }).to(leftTomDrumRef.current, {
+      duration: 0.1,
       scaleY: 0.95,
       transformOrigin: "50% 50%",
-      ease: Expo.easeOut
-    }, '0').to(leftTomDrumRef.current, 0.4, {
+      ease: "expo.out"
+    }, 0).to(leftTomDrumRef.current, {
+      duration: 0.4,
       scale: 1,
       transformOrigin: "50% 50%",
-      ease: Elastic.easeOut
+      ease: "elastic.out"
     });
 
-    const floorTomtl = new TimelineMax({ paused: true });
-    floorTomtl.to(floorTomDrumRef.current, 0.1, {
+    // Floor Tom Drum Animation
+    const floorTomtl = gsap.timeline({ paused: true });
+    floorTomtl.to(floorTomDrumRef.current, {
+      duration: 0.1,
       scaleX: 1.02,
       transformOrigin: "50% 50%",
-      ease: Expo.easeOut
-    }).to(floorTomDrumRef.current, 0.1, {
+      ease: "expo.out"
+    }).to(floorTomDrumRef.current, {
+      duration: 0.1,
       scaleY: 0.95,
       transformOrigin: "50% 100%",
-      ease: Expo.easeOut
-    }, '0').to(floorTomDrumRef.current, 0.4, {
+      ease: "expo.out"
+    }, 0).to(floorTomDrumRef.current, {
+      duration: 0.4,
       scale: 1,
       transformOrigin: "50% 100%",
-      ease: Elastic.easeOut
+      ease: "elastic.out"
     });
 
-    const snaretl = new TimelineMax({ paused: true });
-    snaretl.to(snareDrumRef.current, 0.1, {
+    // Snare Drum Animation
+    const snaretl = gsap.timeline({ paused: true });
+    snaretl.to(snareDrumRef.current, {
+      duration: 0.1,
       scaleX: 1.04,
       transformOrigin: "50% 50%",
-      ease: Expo.easeOut
-    }).to(snareDrumRef.current, 0.1, {
+      ease: "expo.out"
+    }).to(snareDrumRef.current, {
+      duration: 0.1,
       scaleY: 0.9,
       transformOrigin: "50% 100%",
-      ease: Expo.easeOut
-    }, '0').to(snareDrumRef.current, 0.4, {
+      ease: "expo.out"
+    }, 0).to(snareDrumRef.current, {
+      duration: 0.4,
       scale: 1,
       transformOrigin: "50% 100%",
-      ease: Elastic.easeOut
+      ease: "elastic.out"
     });
 
-    const kicktl = new TimelineMax({ paused: true });
-    kicktl.to(kickDrumRef.current, 0.1, {
+    // Kick Drum Animation
+    const kicktl = gsap.timeline({ paused: true });
+    kicktl.to(kickDrumRef.current, {
+      duration: 0.1,
       scale: 1.02,
       transformOrigin: "50% 100%",
-      ease: Expo.easeOut
-    }).to(kickDrumRef.current, 0.4, {
+      ease: "expo.out"
+    }).to(kickDrumRef.current, {
+      duration: 0.4,
       scale: 1,
       transformOrigin: "50% 100%",
-      ease: Elastic.easeOut
+      ease: "elastic.out"
     });
 
-    const hiHattl = new TimelineMax({ paused: true });
-    hiHattl.to(hiHatRef.current, 0.1, {
+    // Hi-Hat Animation
+    const hiHattl = gsap.timeline({ paused: true });
+    hiHattl.to(hiHatRef.current, {
+      duration: 0.1,
       rotation: -4,
       transformOrigin: "50% 50%"
-    }).to(hiHatRef.current, 0.6, {
+    }).to(hiHatRef.current, {
+      duration: 0.6,
       rotation: 0,
       transformOrigin: "50% 50%",
-      ease: Elastic.easeOut.config(1.5, 0.2)
+      ease: "elastic.out(1.5, 0.2)"
     });
 
     const playAudio = (audioRef) => {
@@ -124,48 +149,41 @@ const SVGDrumKit = () => {
 
     const crash = () => {
       crashtl.restart();
-      crashtl.play();
       playAudio(crashAudioRef);
     };
 
     const rightTom = () => {
       rightTomtl.restart();
-      rightTomtl.play();
       playAudio(smallTomAudioRef);
     };
 
     const leftTom = () => {
       leftTomtl.restart();
-      leftTomtl.play();
       playAudio(bigTomAudioRef);
     };
 
     const floorTom = () => {
       floorTomtl.restart();
-      floorTomtl.play();
       playAudio(floorTomAudioRef);
     };
 
     const snare = () => {
       snaretl.restart();
-      snaretl.play();
       playAudio(snareAudioRef);
     };
 
     const kick = () => {
       kicktl.restart();
-      kicktl.play();
       playAudio(kickAudioRef);
     };
 
     const hiHat = () => {
       hiHattl.restart();
-      hiHattl.play();
       playAudio(hiHatClosedAudioRef);
     };
 
     const sequencer = () => {
-      // Logic for sequencer
+      // Logic for sequencer if any
     };
 
     const setTempo = () => {
@@ -261,11 +279,17 @@ const SVGDrumKit = () => {
               </div>
             ))}
             <div className="sequencer-controls">
-              <button id="sequencer-active-btn" className="btn" aria-label="Play" onClick={toggleSequencerOn}><i className={`fa ${sequencerOn ? 'fa-pause' : 'fa-play'}`}></i></button>
+              <button id="sequencer-active-btn" className="btn" aria-label="Play" onClick={toggleSequencerOn}>
+                <i className={`fa ${sequencerOn ? 'fa-pause' : 'fa-play'}`}></i>
+              </button>
               <input className="sequencer-controls-tempo" />
-              <button id="bpm-decrease-btn" className="btn" aria-label="Decrease bpm" onClick={decreaseBpm}><i className="fa fa-minus"></i></button>
+              <button id="bpm-decrease-btn" className="btn" aria-label="Decrease bpm" onClick={decreaseBpm}>
+                <i className="fa fa-minus"></i>
+              </button>
               <input id="bpm-indicator" type="number" min="100" max="300" size="3" value={bpm} readOnly />
-              <button id="bpm-increase-btn" className="btn" aria-label="Increase bpm" onClick={increaseBpm}><i className="fa fa-plus"></i></button>
+              <button id="bpm-increase-btn" className="btn" aria-label="Increase bpm" onClick={increaseBpm}>
+                <i className="fa fa-plus"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -277,8 +301,12 @@ const SVGDrumKit = () => {
       </div>
       <footer className="demo-footer">
         <div className="container-btns">
-          <button className="btn btn-tooltip btn-sequencer" id="sequencer-visible-btn" aria-label="Toggle sequencer" onClick={toggleSequencer}><i className="fa fa-th"></i></button>
-          <button className="btn btn-tooltip btn-keys" id="keys-btn" aria-label="Toggle keyboard legend"><i className="fa fa-keyboard-o"></i></button>
+          <button className="btn btn-tooltip btn-sequencer" id="sequencer-visible-btn" aria-label="Toggle sequencer" onClick={toggleSequencer}>
+            <i className="fa fa-th"></i>
+          </button>
+          <button className="btn btn-tooltip btn-keys" id="keys-btn" aria-label="Toggle keyboard legend">
+            <i className="fa fa-keyboard-o"></i>
+          </button>
         </div>
       </footer>
       <audio id="Crash-Audio" ref={crashAudioRef} preload="auto">

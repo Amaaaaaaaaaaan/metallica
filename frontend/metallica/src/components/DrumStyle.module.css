@@ -6,11 +6,6 @@ html, body {
   height: 100%; /* Ensures body stretches full height */
 }
 
-/* 
-  If you have other global styles, place them here or 
-  in your main index.css. 
-*/
-
 /* --- Root Variables --- */
 :root {
   --bg-dark: #1c1c1c;     /* Dark background for the container */
@@ -53,18 +48,17 @@ button {
   height: 100vh;    /* Fill entire viewport height */
   background-color: var(--bg-dark);
   color: var(--text-color);
-  /* No margin, no gap */
   margin: 0;
   padding: 0;
   gap: 0;
   box-sizing: border-box;
-  max-height: 100vh; /* or another fixed height, e.g. 90vh, 800px, etc. */
+  max-height: 100vh;
   overflow-y: auto; 
 }
 
 /* --- Canvas Container --- */
 .canvasContainer {
-  flex: 5;               /* Adjust ratio if you want the canvas bigger/smaller */
+  flex: 5;
   display: flex;
   align-items: stretch;
   justify-content: stretch;
@@ -78,25 +72,25 @@ button {
   width: 100%;
   height: 100%;
   display: block;
-  /* border-radius: var(--canvas-radius);  // optional if you want rounded corners */
+  /* border-radius: var(--canvas-radius); */
 }
 
 /* --- Controls Panel --- */
 .controls {
-  flex: 3;                /* Adjust ratio as needed */
+  flex: 3;
   background-color: var(--bg-panel);
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 20px;          /* Reduce/increase to control spacing on the right */
+  padding: 20px;
 }
 
 /* --- Recording Buttons --- */
 .triangleButton {
   width: 50px;
   height: 50px;
-  background-color: #28a745; /* Green color */
+  background-color: #28a745; /* Green */
   clip-path: polygon(25% 10%, 25% 90%, 75% 50%);
   display: flex;
   justify-content: center;
@@ -104,13 +98,12 @@ button {
   cursor: pointer;
   border: none;
   transition: all 0.2s ease-in-out;
-  
 }
 
 .redCircleButton {
   width: 0px;
   height: 45px;
-  background-color: #dc3545; /* Red color */
+  background-color: #dc3545; /* Red */
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -118,7 +111,6 @@ button {
   cursor: pointer;
   border: none;
   transition: all 0.2s ease-in-out;
- 
 }
 
 .pauseButton {
@@ -145,8 +137,7 @@ button {
   color: white;
 }
 
-
-.triangleButton,.redCircleButton,.pauseButton {
+.triangleButton, .redCircleButton, .pauseButton {
   display: inline-flex;
   position: relative;
   align-items: center;
@@ -156,14 +147,13 @@ button {
 
 .triangleButton:hover {
   transform: scale(1.1);
-  background-color: #218838; /* Darker green on hover */
+  background-color: #218838;
 }
 
 .redCircleButton:hover {
   transform: scale(1.1);
-  background-color: #c82333; /* Darker red on hover */
+  background-color: #c82333;
 }
-
 
 /* --- Discard Button (for recordings) --- */
 .discardButton {
@@ -218,10 +208,18 @@ button {
   margin-top: 10px;
 }
 
+/* Style the <audio> element to ensure it's visible */
+.recordingItem audio {
+  flex: 1;
+  width: 100%;
+  margin-right: 10px;
+ 
+}
+
 /* Empty State for recordings */
 .emptyMessage {
   text-align: center;
-  color: #aaa;
+  color: #f4f1f1;
   padding: 20px 0;
   font-style: italic;
 }
@@ -378,20 +376,20 @@ button {
 
 /* Container for both the preset and background “cards” side by side */
 .settingsContainer {
-  display: flex;             /* put elements side by side */
-  flex-direction: row;       /* horizontal layout */
-  gap: 20px;                 /* spacing between cards */
-  margin: 10px 0;            /* adjust as needed */
-  justify-content: flex-start; /* align them to the left */
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  margin: 10px 0;
+  justify-content: flex-start;
 }
 
 /* Card-like styling for the preset selector */
 .presetCard {
-  background-color: #2b2b2b; /* a dark background to match your theme */
-  border: 1px solid #444;    /* subtle border */
-  border-radius: 4px;        /* slight rounding */
+  background-color: #2b2b2b;
+  border: 1px solid #444;
+  border-radius: 4px;
   padding: 10px;
-  width: 220px;              /* fixed width (adjust as needed) */
+  width: 260px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
 
@@ -401,11 +399,10 @@ button {
   border: 1px solid #444;
   border-radius: 4px;
   padding: 10px;
-  
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
 
-/* Just some optional styling for headings in these boxes */
+/* Optional heading styling for cards */
 .presetCard h4,
 .backgroundCard h4 {
   margin-top: 0;
@@ -414,16 +411,17 @@ button {
   color: #fff;
 }
 
+/* Scrollbar styling for the main container */
 .container::-webkit-scrollbar {
-  width: 8px; /* scrollbar width */
+  width: 8px;
 }
 
 .container::-webkit-scrollbar-track {
-  background: #2b2b2b; /* track color */
+  background: #2b2b2b;
 }
 
 .container::-webkit-scrollbar-thumb {
-  background-color: #666; /* thumb color */
-  border-radius: 4px;     /* roundness */
-  border: 1px solid #444; /* optional border */
+  background-color: #666;
+  border-radius: 4px;
+  border: 1px solid #444;
 }
