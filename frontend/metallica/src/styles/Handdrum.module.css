@@ -1,0 +1,16 @@
+.hand-drum-container {
+    position: relative;
+    width: 640px;
+    margin: auto;
+  }
+  .hand-drum-canvas {
+    border: 1px solid #ccc;
+    width: 100%;
+    height: auto;
+  }
+  .drum-instructions {
+    text-align: center;
+    margin-top: 10px;
+    font-family: sans-serif;
+  }
+  

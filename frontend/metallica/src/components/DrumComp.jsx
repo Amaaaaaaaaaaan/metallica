@@ -21,7 +21,6 @@ function Loader() {
     const interval = setInterval(() => {
       setMessage(messages[Math.floor(Math.random() * messages.length)]);
     }, 2000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -99,7 +98,7 @@ function DrumsModel({ isPlaying }) {
   );
 }
 
-// This component updates the scene background with a texture from the selected image.
+// Updates the scene background with a texture.
 function CanvasBackground({ bgImage }) {
   const { scene } = useThree();
 
@@ -109,7 +108,7 @@ function CanvasBackground({ bgImage }) {
         scene.background = texture;
       });
     } else {
-      scene.background = null; // Clear background if no image is selected
+      scene.background = null;
     }
   }, [bgImage, scene]);
 
@@ -123,20 +122,20 @@ function DrumComp() {
   const [volume, setVolume] = useState(1.0);
   const [isKeyMappingOpen, setIsKeyMappingOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  // recordings now holds objects: { url, blob }
   const [recordings, setRecordings] = useState([]);
-  const [bgImage, setBgImage] = useState(null); // State to hold background image data URL
+  const [bgImage, setBgImage] = useState(null);
 
   const activeKeys = useRef(new Set());
   const inactivityTimer = useRef(null);
 
-  // Setup AudioContext and MediaRecorder only once.
+  // Setup AudioContext and MediaRecorder once.
   const audioContextRef = useRef(null);
   const destRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
 
   useEffect(() => {
-    // Initialize AudioContext and MediaStreamDestination.
     audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
     destRef.current = audioContextRef.current.createMediaStreamDestination();
     try {
@@ -144,17 +143,15 @@ function DrumComp() {
     } catch (err) {
       console.error("MediaRecorder error:", err);
     }
-
     mediaRecorderRef.current.ondataavailable = (event) => {
       if (event.data.size > 0) {
         recordedChunksRef.current.push(event.data);
       }
     };
-
     mediaRecorderRef.current.onstop = () => {
       const blob = new Blob(recordedChunksRef.current, { type: "audio/webm" });
       const url = URL.createObjectURL(blob);
-      setRecordings((prev) => [...prev, url]);
+      setRecordings((prev) => [...prev, { url, blob }]);
       recordedChunksRef.current = [];
     };
   }, []);
@@ -227,14 +224,33 @@ function DrumComp() {
     }
   };
 
-  // Discard a recorded audio by its index
   const discardRecording = (index) => {
-    setRecordings((prevRecordings) =>
-      prevRecordings.filter((_, idx) => idx !== index)
+    setRecordings((prev) =>
+      prev.filter((_, idx) => idx !== index)
     );
   };
 
-  // Handle file input change to update the background image.
+  // Save the recording to your backend using the full URL.
+  const saveRecording = async (index) => {
+    try {
+      const recording = recordings[index];
+      const formData = new FormData();
+      // Replace "dummy-user-id" with your actual user ID from auth or context.
+      formData.append("userId", "dummy-user-id");
+      formData.append("audio", recording.blob, `recording-${Date.now()}.webm`);
+
+      const response = await fetch("http://localhost:8080/audio/upload-audio", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      console.log("Saved recording:", data);
+    } catch (error) {
+      console.error("Error saving recording:", error);
+    }
+  };
+
+  // Update background image from file input.
   const handleBgChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -258,7 +274,6 @@ function DrumComp() {
           }}
         >
           <Suspense fallback={<Loader />}>
-            {/* Add the background component and pass the selected bgImage */}
             <CanvasBackground bgImage={bgImage} />
             <ambientLight intensity={0.6} />
             <directionalLight position={[2, 2, 2]} intensity={1} />
@@ -279,8 +294,6 @@ function DrumComp() {
             ))}
           </select>
         </div>
-
-        {/* Background Image Changer */}
         <div className={styles.bgChanger}>
           <label htmlFor="bg-input">Change Background:</label>
           <input
@@ -290,11 +303,9 @@ function DrumComp() {
             onChange={handleBgChange}
           />
         </div>
-
         <button className={styles.keyMappingButton} onClick={() => setIsKeyMappingOpen(true)}>
           🎹 Configure Keys
         </button>
-
         <div className={`${styles.popupKeyMapping} ${isKeyMappingOpen ? styles.show : ""}`}>
           <button className={styles.closeButton} onClick={() => setIsKeyMappingOpen(false)}>
             ✖
@@ -302,13 +313,11 @@ function DrumComp() {
           <h3>Key Mapping</h3>
           <KeyMapping soundMap={keyMappings} updateSoundMap={setKeyMappings} />
         </div>
-
         <div className={styles.volumeControls}>
           <label>Volume: {Math.round(volume * 100)}%</label>
           <button onClick={() => adjustVolume(-0.1)}>🔉 Decrease</button>
           <button onClick={() => adjustVolume(0.1)}>🔊 Increase</button>
         </div>
-
         <div className={styles.recordingControls}>
           <button 
             onClick={startRecording} 
@@ -327,23 +336,28 @@ function DrumComp() {
             <span className="visually-hidden">Stop Recording</span>
           </button>
         </div>
-
-        {/* Scrollable container for recorded audios */}
         <div className={styles.recordingsScrollable}>
           {recordings.length === 0 ? (
             <div className={styles.emptyMessage}>
               Why does it sound so empty? Record something!
             </div>
           ) : (
-            recordings.map((url, idx) => (
+            recordings.map((recording, idx) => (
               <div key={idx} className={styles.recordingItem}>
-                <audio controls src={url} />
+                <audio controls src={recording.url} />
                 <button 
                   onClick={() => discardRecording(idx)} 
                   className={styles.discardButton}
                   title="Discard Recording"
                 >
                   Discard
+                </button>
+                <button 
+                  onClick={() => saveRecording(idx)}
+                  className={styles.saveButton}
+                  title="Save Recording"
+                >
+                  Save Recording
                 </button>
               </div>
             ))
