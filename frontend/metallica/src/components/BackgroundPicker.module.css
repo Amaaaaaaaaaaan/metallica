@@ -1,0 +1,83 @@
+.backgroundPicker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    background: #525050;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    width: 250px;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .imageOptions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .colorInput input {
+    border: none;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+  }
+  
+  .fileInput input {
+    display: none;
+  }
+  
+  .fileInput::before {
+    content: "📁";
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
+  .colorGrid {
+    display: grid;
+    /* Adjust the number of columns to suit your design (e.g. 6, 7, 8, etc.) */
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px; /* Space between color squares */
+    margin-top: 8px; /* Some spacing above the grid */
+  }
+  
+  .colorBox {
+    width: 18px;   /* Smaller width */
+    height: 18px;  /* Smaller height */
+    cursor: pointer;
+    box-sizing: border-box;
+    border-radius: 2px;       /* Slight rounding (optional) */
+    transition: transform 0.1s; /* A tiny hover effect (optional) */
+  }
+  
+  .colorBox:hover {
+    transform: scale(1.1); /* Slight enlarge on hover */
+  }
+  
+  
+  .background-container {
+    display: flex;
+    align-items: center; /* Align vertically */
+    gap: 20px; /* Adds space between elements */
+  }
+  
+  .background-picker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #222;
+    padding: 10px;
+    border-radius: 8px;
+  }
+  
+  .background-uploader {
+    display: flex;
+    flex-direction: column;
+  }
+  

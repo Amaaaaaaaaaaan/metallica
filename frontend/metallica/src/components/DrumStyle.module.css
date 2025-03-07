@@ -29,12 +29,12 @@ html, body {
 /* --- Generic Button Style --- */
 button {
   background-color: var(--accent);
-  border-radius: 60px;
+  border-radius: 30px;
   outline: none;
   margin: 0;
   padding: 12px 25px;
   font-family: "Poppins", sans-serif;
-  font-size: 38px;
+  font-size: 30px;
   font-weight: 600;
   line-height: 48px;
   letter-spacing: -1px;
@@ -58,6 +58,8 @@ button {
   padding: 0;
   gap: 0;
   box-sizing: border-box;
+  max-height: 100vh; /* or another fixed height, e.g. 90vh, 800px, etc. */
+  overflow-y: auto; 
 }
 
 /* --- Canvas Container --- */
@@ -92,22 +94,76 @@ button {
 
 /* --- Recording Buttons --- */
 .triangleButton {
-  width: 0;
-  height: 0;
-  border-left: 30px solid transparent;
-  border-right: 30px solid transparent;
-  border-bottom: 40px solid green;
-  background: transparent;
+  width: 50px;
+  height: 50px;
+  background-color: #28a745; /* Green color */
+  clip-path: polygon(25% 10%, 25% 90%, 75% 50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
   border: none;
+  transition: all 0.2s ease-in-out;
+  
 }
 
 .redCircleButton {
-  width: 60px;
-  height: 60px;
-  background-color: red;
+  width: 0px;
+  height: 45px;
+  background-color: #dc3545; /* Red color */
   border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
   border: none;
+  transition: all 0.2s ease-in-out;
+ 
 }
+
+.pauseButton {
+  width: 50px;
+  height: 40px;
+  background-color: #1a95e6;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.pauseButton:hover {
+  background-color: #1a95e6;
+  transform: scale(1.1);
+}
+
+.pauseButton::before {
+  content: "⏸️";
+  font-size: 24px;
+  color: white;
+}
+
+
+.triangleButton,.redCircleButton,.pauseButton {
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  text-align: start;
+  gap: 10px;
+}
+
+.triangleButton:hover {
+  transform: scale(1.1);
+  background-color: #218838; /* Darker green on hover */
+}
+
+.redCircleButton:hover {
+  transform: scale(1.1);
+  background-color: #c82333; /* Darker red on hover */
+}
+
 
 /* --- Discard Button (for recordings) --- */
 .discardButton {
@@ -318,4 +374,56 @@ button {
 
 .popupKeyMapping .closeButton:hover {
   font-size: 18px;
+}
+
+/* Container for both the preset and background “cards” side by side */
+.settingsContainer {
+  display: flex;             /* put elements side by side */
+  flex-direction: row;       /* horizontal layout */
+  gap: 20px;                 /* spacing between cards */
+  margin: 10px 0;            /* adjust as needed */
+  justify-content: flex-start; /* align them to the left */
+}
+
+/* Card-like styling for the preset selector */
+.presetCard {
+  background-color: #2b2b2b; /* a dark background to match your theme */
+  border: 1px solid #444;    /* subtle border */
+  border-radius: 4px;        /* slight rounding */
+  padding: 10px;
+  width: 220px;              /* fixed width (adjust as needed) */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+/* Card-like styling for the background picker */
+.backgroundCard {
+  background-color: #2c2828;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 10px;
+  
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+/* Just some optional styling for headings in these boxes */
+.presetCard h4,
+.backgroundCard h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+.container::-webkit-scrollbar {
+  width: 8px; /* scrollbar width */
+}
+
+.container::-webkit-scrollbar-track {
+  background: #2b2b2b; /* track color */
+}
+
+.container::-webkit-scrollbar-thumb {
+  background-color: #666; /* thumb color */
+  border-radius: 4px;     /* roundness */
+  border: 1px solid #444; /* optional border */
 }
