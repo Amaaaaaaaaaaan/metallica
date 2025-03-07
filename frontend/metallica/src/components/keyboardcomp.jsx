@@ -4,11 +4,12 @@ import { Environment, OrbitControls, useGLTF, useAnimations, useProgress, Html }
 import * as THREE from "three";
 import styles from "./DrumStyle.module.css";
 import KeyMapping from "./KeyMapping";
+import BackgroundPicker from "./BackgroundPicker";
 
 function Loader() {
   const { progress } = useProgress();
   const messages = [
-    "Tuning the drums... 🎵",
+    "Tuning the keyborad... 🎵",
     "Setting up the stage... 🎤",
     "Warming up the sticks... 🥁",
     "Loading beats... 🎶",
@@ -108,18 +109,23 @@ function DrumsModel({ isPlaying }) {
   );
 }
 
+// Updated CanvasBackground to handle both color and image backgrounds.
 function CanvasBackground({ bgImage }) {
   const { scene } = useThree();
 
   useEffect(() => {
     if (bgImage) {
-      new THREE.TextureLoader().load(bgImage, (texture) => {
-        texture.encoding = THREE.sRGBEncoding;
-        texture.minFilter = THREE.LinearFilter;
-        texture.magFilter = THREE.LinearFilter;
-        texture.anisotropy = 16;
-        scene.background = texture;
-      });
+      if (bgImage.type === "color") {
+        scene.background = new THREE.Color(bgImage.value);
+      } else if (bgImage.type === "image") {
+        new THREE.TextureLoader().load(bgImage.value, (texture) => {
+          texture.encoding = THREE.sRGBEncoding;
+          texture.minFilter = THREE.LinearFilter;
+          texture.magFilter = THREE.LinearFilter;
+          texture.anisotropy = 16;
+          scene.background = texture;
+        });
+      }
     } else {
       scene.background = null;
     }
@@ -136,7 +142,10 @@ function Keyboardcomp() {
   const [isKeyMappingOpen, setIsKeyMappingOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordings, setRecordings] = useState([]);
+  // bgImage will be an object, for example: { type: "color", value: "#ff0000" } or { type: "image", value: "data:image/..." }
   const [bgImage, setBgImage] = useState(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isRecordingActive, setIsRecordingActive] = useState(false);
 
   const activeKeys = useRef(new Set());
   const inactivityTimer = useRef(null);
@@ -227,29 +236,33 @@ function Keyboardcomp() {
       recordedChunksRef.current = [];
       mediaRecorderRef.current.start();
       setIsRecording(true);
+      setIsRecordingActive(true); // Show Pause Button
+    }
+  };
+
+  const pauseRecording = () => {
+    if (mediaRecorderRef.current) {
+      if (mediaRecorderRef.current.state === "recording") {
+        mediaRecorderRef.current.pause();
+        setIsPaused(true);
+      } else if (mediaRecorderRef.current.state === "paused") {
+        mediaRecorderRef.current.resume();
+        setIsPaused(false);
+      }
+      setIsRecordingActive(mediaRecorderRef.current.state === "recording");
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      setIsRecordingActive(false); // Reset to Start Button
     }
   };
 
   const discardRecording = (index) => {
     setRecordings((prev) => prev.filter((_, idx) => idx !== index));
-  };
-
-  const handleBgChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setBgImage(e.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   return (
@@ -264,49 +277,40 @@ function Keyboardcomp() {
           gl={{
             outputEncoding: THREE.sRGBEncoding,
             toneMapping: THREE.ACESFilmicToneMapping,
-            toneMappingExposure: 0.8  // Lower exposure for more contrast/darkness
+            toneMappingExposure: 0.8
           }}
         >
           <Suspense fallback={<Loader />}>
             <CanvasBackground bgImage={bgImage} />
-            {/* Lowered ambient light for a darker overall look */}
             <ambientLight intensity={0.6} />
-            {/* Adjust hemisphere light to provide subtle sky/ground balance */}
-            <hemisphereLight
-              skyColor={"#aaaaaa"}
-              groundColor={"#222222"}
-              intensity={0.3}
-              position={[0, 50, 0]}
-            />
-            {/* Reduced directional light intensity */}
+            <hemisphereLight skyColor={"#aaaaaa"} groundColor={"#222222"} intensity={0.3} position={[0, 50, 0]} />
             <directionalLight position={[5, 5, 5]} intensity={0.8} />
-            <DrumsModel isPlaying={isAnimating} />
+            <DrumsModel isPlaying={isAnimating} activeKeys={activeKeys} />
             <OrbitControls enableZoom={true} enablePan={true} />
             <Environment preset="sunset" />
           </Suspense>
         </Canvas>
       </div>
       <div className={styles.controls}>
-        <div className={styles.presetSelector}>
-          <label>Drum Presets:</label>
-          <select onChange={handlePresetChange} value={keyMapping}>
-            {Object.keys(PRESET_MAPPINGS).map((preset) => (
-              <option key={preset} value={preset}>
-                {preset}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className={styles.settingsContainer}>
+  <div className={styles.presetCard}>
+    <h4>Keyboard Preset</h4>
+    <label>Presets:</label>
+    <select onChange={handlePresetChange} value={keyMapping}>
+      {Object.keys(PRESET_MAPPINGS).map((preset) => (
+        <option key={preset} value={preset}>
+          {preset}
+        </option>
+      ))}
+    </select>
+  </div>
 
-        <div className={styles.bgChanger}>
-          <label htmlFor="bg-input">Change Background:</label>
-          <input
-            id="bg-input"
-            type="file"
-            accept="image/*"
-            onChange={handleBgChange}
-          />
-        </div>
+  <div className={styles.backgroundCard}>
+    <h4>Background</h4>
+    <BackgroundPicker setBg={setBgImage} />
+  </div>
+</div>
+
 
         <button className={styles.keyMappingButton} onClick={() => setIsKeyMappingOpen(true)}>
           🎹 Configure Keys
@@ -325,47 +329,57 @@ function Keyboardcomp() {
           <button onClick={() => adjustVolume(-0.1)}>🔉 Decrease</button>
           <button onClick={() => adjustVolume(0.1)}>🔊 Increase</button>
         </div>
-
         <div className={styles.recordingControls}>
-          <button 
-            onClick={startRecording} 
-            disabled={isRecording} 
-            className={styles.triangleButton}
-            title="Start Recording"
-          >
-            <span className="visually-hidden">Start Recording</span>
-          </button>
+          {isRecording ? (
+            <button 
+              onClick={pauseRecording} 
+              className={isPaused ? styles.triangleButton : styles.pauseButton}
+              title={isPaused ? "Resume Recording" : "Pause Recording"}
+            >
+            </button>
+          ) : (
+            <button 
+              onClick={startRecording} 
+              className={styles.triangleButton}
+              title="Start Recording"
+            >
+            </button>
+          )}
+
           <button 
             onClick={stopRecording} 
             disabled={!isRecording} 
             className={styles.redCircleButton}
             title="Stop Recording"
           >
-            <span className="visually-hidden">Stop Recording</span>
           </button>
         </div>
 
         <div className={styles.recordingsScrollable}>
-          {recordings.length === 0 ? (
-            <div className={styles.emptyMessage}>
-              Why does it sound so empty? Record something!
-            </div>
-          ) : (
-            recordings.map((url, idx) => (
-              <div key={idx} className={styles.recordingItem}>
-                <audio controls src={url} />
-                <button 
-                  onClick={() => discardRecording(idx)} 
-                  className={styles.discardButton}
-                  title="Discard Recording"
-                >
-                  Discard
-                </button>
-              </div>
-            ))
-          )}
-        </div>
+  {recordings.length === 0 ? (
+    <div className={styles.emptyMessage}>
+      Why does it sound so empty? Record something!
+    </div>
+  ) : (
+    recordings.map((url, idx) => (
+      <div key={idx} className={styles.recordingItem}>
+        <audio controls>
+          {/* Explicitly define the MIME type for better browser support */}
+          <source src={url} type="audio/webm; codecs=opus" />
+          Your browser does not support the audio element.
+        </audio>
+        <button
+          onClick={() => discardRecording(idx)}
+          className={styles.discardButton}
+          title="Discard Recording"
+        >
+          Discard
+        </button>
       </div>
+    ))
+  )}
+</div>
+</div>
     </div>
   );
 }
