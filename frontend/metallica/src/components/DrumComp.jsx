@@ -1,7 +1,9 @@
 import React, { Suspense, useState, useEffect, useRef } from "react";
-import { Canvas,useThree } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { Environment, OrbitControls, useGLTF, useAnimations, useProgress, Html } from "@react-three/drei";
 import * as THREE from "three";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import styles from "./DrumStyle.module.css";
 import KeyMapping from "./KeyMapping";
 import BackgroundPicker from "./BackgroundPicker";
@@ -26,31 +28,37 @@ function Loader() {
   }, []);
   return (
     <Html center>
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        color: "white",
-        fontSize: "16px",
-        fontWeight: "bold",
-        textAlign: "center"
-      }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          color: "white",
+          fontSize: "16px",
+          fontWeight: "bold",
+          textAlign: "center"
+        }}
+      >
         <p>{message}</p>
-        <div style={{
-          width: "200px",
-          height: "10px",
-          background: "rgba(255, 255, 255, 0.2)",
-          borderRadius: "5px",
-          position: "relative",
-          overflow: "hidden",
-          marginBottom: "10px"
-        }}>
-          <div style={{
-            width: `${progress}%`,
-            height: "100%",
-            background: "white",
-            transition: "width 0.3s"
-          }}></div>
+        <div
+          style={{
+            width: "200px",
+            height: "10px",
+            background: "rgba(255, 255, 255, 0.2)",
+            borderRadius: "5px",
+            position: "relative",
+            overflow: "hidden",
+            marginBottom: "10px"
+          }}
+        >
+          <div
+            style={{
+              width: `${progress}%`,
+              height: "100%",
+              background: "white",
+              transition: "width 0.3s"
+            }}
+          ></div>
         </div>
         <p>{Math.round(progress)}% Loaded</p>
       </div>
@@ -67,7 +75,7 @@ const PRESET_MAPPINGS = {
     q: "/audios/hat+bass.mp3",
     e: "/audios/left_bottom.mp3",
     r: "/audios/right_bottom_Drum.mp3",
-    t: "/audios/right_Cymbal.mp3",
+    t: "/audios/right_Cymbal.mp3"
   },
   Alternative: {
     w: "/audios/alternative_bass.mp3",
@@ -77,8 +85,8 @@ const PRESET_MAPPINGS = {
     q: "/audios/alternative_crash.mp3",
     e: "/audios/alternative_ride.mp3",
     r: "/audios/alternative_floor_tom.mp3",
-    t: "/audios/alternative_splash.mp3",
-  },
+    t: "/audios/alternative_splash.mp3"
+  }
 };
 
 function DrumsModel({ isPlaying }) {
@@ -97,12 +105,7 @@ function DrumsModel({ isPlaying }) {
     }
   }, [isPlaying, actions, animations]);
   return (
-    <primitive
-      object={scene}
-      scale={5}
-      position={[0, 0, 0]}
-      rotation={[0, 0, 0]}
-    />
+    <primitive object={scene} scale={5} position={[0, 0, 0]} rotation={[0, 0, 0]} />
   );
 }
 
@@ -136,13 +139,12 @@ function DrumComp() {
   const [isKeyMappingOpen, setIsKeyMappingOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordings, setRecordings] = useState([]);
-  // unsavedRecording holds the temporary Data URL from a new recording
   const [unsavedRecording, setUnsavedRecording] = useState(null);
   const [bgImage, setBgImage] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isRecordingActive, setIsRecordingActive] = useState(false);
-  // showSaveDialog is controlled by the bottom player’s Save button click
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
 
   const activeKeys = useRef(new Set());
   const inactivityTimer = useRef(null);
@@ -150,6 +152,8 @@ function DrumComp() {
   const destRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
+  const timerIntervalRef = useRef(null);
+  const toastIdRef = useRef(null);
 
   // Load saved recordings from localStorage on mount
   useEffect(() => {
@@ -179,7 +183,6 @@ function DrumComp() {
         const base64data = reader.result;
         console.log("Unsaved recording Data URL:", base64data);
         setUnsavedRecording(base64data);
-        // Do not automatically show the dialog now
       };
       reader.readAsDataURL(blob);
       recordedChunksRef.current = [];
@@ -238,6 +241,19 @@ function DrumComp() {
     });
   };
 
+  // Start the timer interval and update the persistent toast message each second
+  const startTimer = () => {
+    timerIntervalRef.current = setInterval(() => {
+      setRecordingTime((prevTime) => {
+        const newTime = prevTime + 1;
+        if (toastIdRef.current) {
+          toast.update(toastIdRef.current, { render: `Recording started - Timer: ${newTime}s` });
+        }
+        return newTime;
+      });
+    }, 1000);
+  };
+
   const startRecording = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "inactive") {
       recordedChunksRef.current = [];
@@ -245,6 +261,14 @@ function DrumComp() {
       setIsRecording(true);
       setIsRecordingActive(true);
       setUnsavedRecording(null);
+      setRecordingTime(0);
+      // Create a persistent toast with autoClose disabled
+      toastIdRef.current = toast.info(`Recording started - Timer: 0s`, {
+        autoClose: false,
+        theme: "colored",
+        position: "top-center"
+      });
+      startTimer();
     }
   };
 
@@ -253,9 +277,18 @@ function DrumComp() {
       if (mediaRecorderRef.current.state === "recording") {
         mediaRecorderRef.current.pause();
         setIsPaused(true);
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+        if (toastIdRef.current) {
+          toast.update(toastIdRef.current, { render: `Recording paused - Timer: ${recordingTime}s` });
+        }
       } else if (mediaRecorderRef.current.state === "paused") {
         mediaRecorderRef.current.resume();
         setIsPaused(false);
+        if (toastIdRef.current) {
+          toast.update(toastIdRef.current, { render: `Recording resumed - Timer: ${recordingTime}s` });
+        }
+        startTimer();
       }
       setIsRecordingActive(mediaRecorderRef.current.state === "recording");
     }
@@ -266,6 +299,18 @@ function DrumComp() {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       setIsRecordingActive(false);
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+      // Dismiss the persistent toast and show a new error toast
+      if (toastIdRef.current) {
+        toast.dismiss(toastIdRef.current);
+        toastIdRef.current = null;
+      }
+      toast.error(`Recording stopped - Timer: ${recordingTime}s`, {
+        autoClose: 3000,
+        position: "top-center",
+        style: { backgroundColor: "#ff4d4d", color: "#fff" }
+      });
     }
   };
 
@@ -279,7 +324,6 @@ function DrumComp() {
     localStorage.setItem("recordings", JSON.stringify(updated));
   };
 
-  // When the SaveRecordingDialog calls onSave, add the new recording to saved recordings
   const handleSaveUnsaved = (newRecording) => {
     const updatedRecordings = [...recordings, newRecording];
     setRecordings(updatedRecordings);
@@ -380,7 +424,6 @@ function DrumComp() {
           />
         </div>
       </div>
-      {/* Render UnsavedPreviewBottomPlayer if an unsaved recording exists */}
       {unsavedRecording && (
         <UnsavedPreviewBottomPlayer
           recordingUrl={unsavedRecording}
@@ -389,7 +432,6 @@ function DrumComp() {
           onClose={() => {}}
         />
       )}
-      {/* Render SaveRecordingDialog when showSaveDialog is true */}
       {showSaveDialog && unsavedRecording && (
         <SaveRecordingDialog
           recordingUrl={unsavedRecording}
@@ -397,6 +439,7 @@ function DrumComp() {
           onCancel={() => setShowSaveDialog(false)}
         />
       )}
+      <ToastContainer />
     </div>
   );
 }

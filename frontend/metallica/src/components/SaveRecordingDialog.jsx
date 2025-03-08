@@ -1,10 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import styles from "./SaveRecordingDialog.module.css";
 
 const SaveRecordingDialog = ({ recordingUrl, onSave, onCancel }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    // Display a toast when the recording is started
+    toast.info("Recording started");
+  }, []);
 
   const handleSave = () => {
     if (!recordingUrl) return;
@@ -51,6 +58,8 @@ const SaveRecordingDialog = ({ recordingUrl, onSave, onCancel }) => {
           </button>
         </div>
       </div>
+      {/* Toast Container for notifications */}
+      <ToastContainer position="top-center" autoClose={3000} />
     </div>,
     document.body
   );
