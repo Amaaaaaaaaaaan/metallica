@@ -121,6 +121,17 @@ function CanvasBackground({ bgImage }) {
           scene.background = texture;
         });
       }
+      if (bgImage.type === "color") {
+        scene.background = new THREE.Color(bgImage.value);
+      } else if (bgImage.type === "image") {
+        new THREE.TextureLoader().load(bgImage.value, (texture) => {
+          texture.encoding = THREE.sRGBEncoding;
+          texture.minFilter = THREE.LinearFilter;
+          texture.magFilter = THREE.LinearFilter;
+          texture.anisotropy = 16;
+          scene.background = texture;
+        });
+      }
     } else {
       scene.background = null;
     }
@@ -259,6 +270,7 @@ function DrumComp() {
   };
 
   const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
       setIsRecording(false);

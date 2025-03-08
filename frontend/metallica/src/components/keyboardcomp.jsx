@@ -17,7 +17,7 @@ function Loader() {
   ];
 
   function DrumsModel({ isPlaying }) {
-    const { scene, animations } = useGLTF("/keyboard.gltf");
+    const { scene, animations } = useGLTF("/piano3d.gltf");
     const { actions } = useAnimations(animations, scene);
   
     // Log the model's position once the scene is loaded
@@ -115,7 +115,7 @@ const PRESET_MAPPINGS = {
 };
 
 function DrumsModel({ isPlaying }) {
-  const { scene, animations } = useGLTF("/keyboard.gltf");
+  const { scene, animations } = useGLTF("/piano3d.gltf");
   const { actions } = useAnimations(animations, scene);
 
   useEffect(() => {
@@ -173,6 +173,7 @@ function Keyboardcomp() {
   const [volume, setVolume] = useState(1.0);
   const [isKeyMappingOpen, setIsKeyMappingOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  // Store each recording as an object with { url, approved }
   const [recordings, setRecordings] = useState([]);
   // bgImage will be an object, for example: { type: "color", value: "#ff0000" } or { type: "image", value: "data:image/..." }
   const [bgImage, setBgImage] = useState(null);
@@ -205,7 +206,8 @@ function Keyboardcomp() {
     mediaRecorderRef.current.onstop = () => {
       const blob = new Blob(recordedChunksRef.current, { type: "audio/webm" });
       const url = URL.createObjectURL(blob);
-      setRecordings((prev) => [...prev, url]);
+      // Save the recording with approved flag set to false
+      setRecordings((prev) => [...prev, { url, approved: false }]);
       recordedChunksRef.current = [];
     };
   }, []);
@@ -231,7 +233,7 @@ function Keyboardcomp() {
         clearTimeout(inactivityTimer.current);
       }
     };
-
+                              
     const handleKeyUp = (event) => {
       const key = event.key.toLowerCase();
       activeKeys.current.delete(key);
@@ -293,8 +295,26 @@ function Keyboardcomp() {
     }
   };
 
+  // Discard a recording at a given index
   const discardRecording = (index) => {
     setRecordings((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
+  // Mark a recording as approved
+  const approveRecording = (index) => {
+    setRecordings((prev) => {
+      const newRecordings = [...prev];
+      newRecordings[index].approved = true;
+      return newRecordings;
+    });
+  };
+
+  // Download a recording that has been approved
+  const downloadRecording = (url, idx) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `recording-${idx}.webm`;
+    a.click();
   };
 
   return (
@@ -317,32 +337,31 @@ function Keyboardcomp() {
             <ambientLight intensity={0.6} />
             <hemisphereLight skyColor={"#aaaaaa"} groundColor={"#222222"} intensity={0.3} position={[0, 50, 0]} />
             <directionalLight position={[5, 5, 5]} intensity={0.8} />
-            <DrumsModel isPlaying={isAnimating} activeKeys={activeKeys} />
+            <DrumsModel isPlaying={isAnimating} />
             <OrbitControls enableZoom={true} enablePan={true} />
             <Environment preset="sunset" />
           </Suspense>
         </Canvas>
       </div>
       <div className={styles.controls}>
-      <div className={styles.settingsContainer}>
-  <div className={styles.presetCard}>
-    <h4>Keyboard Preset</h4>
-    <label>Presets:</label>
-    <select onChange={handlePresetChange} value={keyMapping}>
-      {Object.keys(PRESET_MAPPINGS).map((preset) => (
-        <option key={preset} value={preset}>
-          {preset}
-        </option>
-      ))}
-    </select>
-  </div>
+        <div className={styles.settingsContainer}>
+          <div className={styles.presetCard}>
+            <h4>Keyboard Preset</h4>
+            <label>Presets:</label>
+            <select onChange={handlePresetChange} value={keyMapping}>
+              {Object.keys(PRESET_MAPPINGS).map((preset) => (
+                <option key={preset} value={preset}>
+                  {preset}
+                </option>
+              ))}
+            </select>
+          </div>
 
-  <div className={styles.backgroundCard}>
-    <h4>Background</h4>
-    <BackgroundPicker setBg={setBgImage} />
-  </div>
-</div>
-
+          <div className={styles.backgroundCard}>
+            <h4>Background</h4>
+            <BackgroundPicker setBg={setBgImage} />
+          </div>
+        </div>
 
         <button className={styles.keyMappingButton} onClick={() => setIsKeyMappingOpen(true)}>
           🎹 Configure Keys
@@ -386,32 +405,36 @@ function Keyboardcomp() {
           >
           </button>
         </div>
-
         <div className={styles.recordingsScrollable}>
-  {recordings.length === 0 ? (
-    <div className={styles.emptyMessage}>
-      Why does it sound so empty? Record something!
-    </div>
-  ) : (
-    recordings.map((url, idx) => (
-      <div key={idx} className={styles.recordingItem}>
-        <audio controls>
-          {/* Explicitly define the MIME type for better browser support */}
-          <source src={url} type="audio/webm; codecs=opus" />
-          Your browser does not support the audio element.
-        </audio>
-        <button
-          onClick={() => discardRecording(idx)}
-          className={styles.discardButton}
-          title="Discard Recording"
-        >
-          Discard
-        </button>
+          {recordings.length === 0 ? (
+            <div className={styles.emptyMessage}>
+              Why does it sound so empty? Record something!
+            </div>
+          ) : (
+            recordings.map((recording, idx) => (
+              <div key={idx} className={styles.recordingItem}>
+                <audio className="audio" controls src={recording.url} />
+                <button 
+                  onClick={() => discardRecording(idx)} 
+                  className={styles.discardButton}
+                  title="Discard Recording"
+                >
+                  Discard
+                </button>
+                <button 
+                  onClick={() => saveRecording(idx)}
+                  className={styles.saveButton}
+                  title="Save Recording"
+                >
+                  Save Recording
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+
+
       </div>
-    ))
-  )}
-</div>
-</div>
     </div>
   );
 }
