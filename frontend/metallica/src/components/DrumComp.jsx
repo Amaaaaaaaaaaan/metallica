@@ -379,27 +379,6 @@ function DrumComp() {
             title="Stop Recording"
           />
         </div>
-        <div className={styles.recordingsScrollable}>
-          {recordings.length === 0 ? (
-            <div className={styles.emptyMessage}>
-              Why does it sound so empty? Record something!
-            </div>
-          ) : (
-            recordings.map((item, idx) => (
-              <div key={idx} className={styles.recordingItem}>
-                <audio controls src={item.dataUrl} style={{ width: "100%" }} />
-                <p style={{ color: "#ccc" }}>{item.title}</p>
-                <button
-                  onClick={() => discardRecording(idx)}
-                  className={styles.discardButton}
-                  title="Discard Recording"
-                >
-                  Discard
-                </button>
-              </div>
-            ))
-          )}
-        </div>
       </div>
       {/* Render UnsavedPreviewBottomPlayer if an unsaved recording exists */}
       {unsavedRecording && (

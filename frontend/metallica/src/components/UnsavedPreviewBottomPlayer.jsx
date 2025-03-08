@@ -188,9 +188,7 @@ const UnsavedPreviewBottomPlayer = ({ recordingUrl, onSave, onDiscard, onClose }
               Discard
             </button>
           </div>
-          {onClose && (
-            <button onClick={onClose} className={styles.closeButton}>✖</button>
-          )}
+          
         </div>
       )}
     </>,
