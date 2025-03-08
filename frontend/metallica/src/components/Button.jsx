@@ -1,4 +1,4 @@
-import styles from './Button.module.css';
+import styles from '../styles/Button.module.css';
 import { Suspense, useState } from "react";
 import { motion, MotionConfig, useMotionValue } from "framer-motion";
 import { transition } from "./settings";

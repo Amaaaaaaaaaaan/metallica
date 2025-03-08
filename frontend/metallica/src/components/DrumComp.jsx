@@ -23,7 +23,6 @@ function Loader() {
     const interval = setInterval(() => {
       setMessage(messages[Math.floor(Math.random() * messages.length)]);
     }, 2000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -101,8 +100,6 @@ function DrumsModel({ isPlaying }) {
   );
 }
 
-// This component updates the scene background with a texture from the selected image.
-
 function CanvasBackground({ bgImage }) {
   const { scene } = useThree();
 
@@ -126,6 +123,7 @@ function CanvasBackground({ bgImage }) {
 
   return null;
 }
+
 function DrumComp() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [keyMapping, setKeyMapping] = useState("Default");
@@ -133,8 +131,9 @@ function DrumComp() {
   const [volume, setVolume] = useState(1.0);
   const [isKeyMappingOpen, setIsKeyMappingOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  // recordings now holds objects: { url, blob }
   const [recordings, setRecordings] = useState([]);
-  // bgImage will be an object, for example: { type: "color", value: "#ff0000" } or { type: "image", value: "data:image/..." }
+  // bgImage state (only declared once)
   const [bgImage, setBgImage] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isRecordingActive, setIsRecordingActive] = useState(false);
@@ -155,17 +154,15 @@ function DrumComp() {
     } catch (err) {
       console.error("MediaRecorder error:", err);
     }
-
     mediaRecorderRef.current.ondataavailable = (event) => {
       if (event.data.size > 0) {
         recordedChunksRef.current.push(event.data);
       }
     };
-
     mediaRecorderRef.current.onstop = () => {
       const blob = new Blob(recordedChunksRef.current, { type: "audio/webm" });
       const url = URL.createObjectURL(blob);
-      setRecordings((prev) => [...prev, url]);
+      setRecordings((prev) => [...prev, { url, blob }]);
       recordedChunksRef.current = [];
     };
   }, []);
@@ -257,6 +254,38 @@ function DrumComp() {
     setRecordings((prev) => prev.filter((_, idx) => idx !== index));
   };
 
+  // Save the recording to your backend using the full URL.
+  const saveRecording = async (index) => {
+    try {
+      const recording = recordings[index];
+      const formData = new FormData();
+      // Replace "dummy-user-id" with your actual user ID from auth or context.
+      formData.append("userId", "dummy-user-id");
+      formData.append("audio", recording.blob, `recording-${Date.now()}.webm`);
+
+      const response = await fetch("http://localhost:8080/audio/upload-audio", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      console.log("Saved recording:", data);
+    } catch (error) {
+      console.error("Error saving recording:", error);
+    }
+  };
+
+  // Update background image from file input.
+  const handleBgChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setBgImage({ type: "image", value: e.target.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.canvasContainer}>
@@ -284,30 +313,46 @@ function DrumComp() {
         </Canvas>
       </div>
       <div className={styles.controls}>
-      <div className={styles.settingsContainer}>
-  <div className={styles.presetCard}>
-    <h4>Keyboard Preset</h4>
-    <label>Presets:</label>
-    <select onChange={handlePresetChange} value={keyMapping}>
-      {Object.keys(PRESET_MAPPINGS).map((preset) => (
-        <option key={preset} value={preset}>
-          {preset}
-        </option>
-      ))}
-    </select>
-  </div>
+        <div className={styles.settingsContainer}>
+          <div className={styles.presetCard}>
+            <h4>Keyboard Preset</h4>
+            <label>Presets:</label>
+            <select onChange={handlePresetChange} value={keyMapping}>
+              {Object.keys(PRESET_MAPPINGS).map((preset) => (
+                <option key={preset} value={preset}>
+                  {preset}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.backgroundCard}>
+            <h4>Background</h4>
+            <BackgroundPicker setBg={setBgImage} />
+          </div>
+        </div>
 
-  <div className={styles.backgroundCard}>
-    <h4>Background</h4>
-    <BackgroundPicker setBg={setBgImage} />
-  </div>
-</div>
-
-
+        <div className={styles.presetSelector}>
+          <label>Drum Presets:</label>
+          <select onChange={handlePresetChange} value={keyMapping}>
+            {Object.keys(PRESET_MAPPINGS).map((preset) => (
+              <option key={preset} value={preset}>
+                {preset}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className={styles.bgChanger}>
+          <label htmlFor="bg-input">Change Background:</label>
+          <input
+            id="bg-input"
+            type="file"
+            accept="image/*"
+            onChange={handleBgChange}
+          />
+        </div>
         <button className={styles.keyMappingButton} onClick={() => setIsKeyMappingOpen(true)}>
           🎹 Configure Keys
         </button>
-
         <div className={`${styles.popupKeyMapping} ${isKeyMappingOpen ? styles.show : ""}`}>
           <button className={styles.closeButton} onClick={() => setIsKeyMappingOpen(false)}>
             ✖
@@ -315,7 +360,6 @@ function DrumComp() {
           <h3>Key Mapping</h3>
           <KeyMapping soundMap={keyMappings} updateSoundMap={setKeyMappings} />
         </div>
-
         <div className={styles.volumeControls}>
           <label>Volume: {Math.round(volume * 100)}%</label>
           <button onClick={() => adjustVolume(-0.1)}>🔉 Decrease</button>
@@ -337,7 +381,6 @@ function DrumComp() {
             >
             </button>
           )}
-
           <button 
             onClick={stopRecording} 
             disabled={!isRecording} 
@@ -346,22 +389,28 @@ function DrumComp() {
           >
           </button>
         </div>
-
         <div className={styles.recordingsScrollable}>
           {recordings.length === 0 ? (
             <div className={styles.emptyMessage}>
               Why does it sound so empty? Record something!
             </div>
           ) : (
-            recordings.map((url, idx) => (
+            recordings.map((recording, idx) => (
               <div key={idx} className={styles.recordingItem}>
-                <audio controls src={url} />
+                <audio controls src={recording.url} />
                 <button 
                   onClick={() => discardRecording(idx)} 
                   className={styles.discardButton}
                   title="Discard Recording"
                 >
                   Discard
+                </button>
+                <button 
+                  onClick={() => saveRecording(idx)}
+                  className={styles.saveButton}
+                  title="Save Recording"
+                >
+                  Save Recording
                 </button>
               </div>
             ))

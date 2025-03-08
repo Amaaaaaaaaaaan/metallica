@@ -1,0 +1,397 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 5386,
+      "max": [
+        7.740808010101318,
+        4.768701076507568,
+        11.759965896606445
+      ],
+      "min": [
+        -7.712906360626221,
+        -10.14651107788086,
+        -10.26884651184082
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 64632,
+      "componentType": 5126,
+      "count": 5386,
+      "max": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "min": [
+        -1.0,
+        -1.0,
+        -1.0
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 5386,
+      "max": [
+        0.875,
+        1.0
+      ],
+      "min": [
+        -0.0,
+        -7.450580596923828e-09
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 17400,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 129264,
+      "componentType": 5126,
+      "count": 285,
+      "max": [
+        6.149528980255127,
+        -10.14651107788086,
+        10.305953025817871
+      ],
+      "min": [
+        -6.125357627868652,
+        -10.589998245239258,
+        -8.395188331604004
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 132684,
+      "componentType": 5126,
+      "count": 285,
+      "max": [
+        0.9861416220664978,
+        -0.1561965048313141,
+        0.9861412644386292
+      ],
+      "min": [
+        -0.9861416220664978,
+        -0.9998785853385925,
+        -0.9861410856246948
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 43088,
+      "componentType": 5126,
+      "count": 285,
+      "max": [
+        0.6250000596046448,
+        1.0
+      ],
+      "min": [
+        -1.9557489849830745e-08,
+        -4.470348358154297e-08
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 69600,
+      "componentType": 5125,
+      "count": 1260,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 136104,
+      "componentType": 5126,
+      "count": 2236,
+      "max": [
+        6.704726219177246,
+        -3.2569074630737305,
+        11.373093605041504
+      ],
+      "min": [
+        -6.368630886077881,
+        -3.498784065246582,
+        9.275382041931152
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 162936,
+      "componentType": 5126,
+      "count": 2236,
+      "max": [
+        1.0,
+        0.9999753832817078,
+        1.0
+      ],
+      "min": [
+        -1.0,
+        -1.0,
+        -1.0
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 45368,
+      "componentType": 5126,
+      "count": 2236,
+      "max": [
+        0.875,
+        1.0
+      ],
+      "min": [
+        0.125,
+        0.0
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 74640,
+      "componentType": 5125,
+      "count": 4644,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "profhugo.zion (https://sketchfab.com/profhugo.zion)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/piano-65b681920e334148b6e0b1aa7bc8fe4c",
+      "title": "Piano"
+    },
+    "generator": "Sketchfab-16.53.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 93216,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 63256,
+      "byteOffset": 93216,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 189768,
+      "byteOffset": 156472,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 346240,
+      "uri": "piano3d.bin"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "standardSurface3",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "metallicFactor": 0.5592397995879607,
+        "roughnessFactor": 0.18742914264119662
+      }
+    },
+    {
+      "doubleSided": true,
+      "name": "standardSurface5",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          1.0,
+          0.43425069249245773,
+          0.0,
+          1.0
+        ],
+        "metallicFactor": 0.8091453231095561,
+        "roughnessFactor": 0.15085760261364606
+      }
+    },
+    {
+      "doubleSided": true,
+      "name": "lambert2",
+      "pbrMetallicRoughness": {
+        "metallicFactor": 0.6567639063280954,
+        "roughnessFactor": 0.29104850605258986
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "pCube169_standardSurface3_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "pCube169_standardSurface5_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 5,
+            "POSITION": 4,
+            "TEXCOORD_0": 6
+          },
+          "indices": 7,
+          "material": 1,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "pCube169_lambert2_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 9,
+            "POSITION": 8,
+            "TEXCOORD_0": 10
+          },
+          "indices": 11,
+          "material": 2,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        -1.0,
+        0.0,
+        0.0,
+        1.0,
+        2.220446049250313e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        0.009999999776482582,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.009999999776482582,
+        0.0,
+        0.0,
+        -0.009999999776482582,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "3f23995ebfeb4a84a93e177d11eacfb4.fbx"
+    },
+    {
+      "children": [
+        3
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        4,
+        5,
+        6
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        10.571017265319824,
+        0.0,
+        1.0
+      ],
+      "name": "pCube169"
+    },
+    {
+      "mesh": 0,
+      "name": "pCube169_standardSurface3_0"
+    },
+    {
+      "mesh": 1,
+      "name": "pCube169_standardSurface5_0"
+    },
+    {
+      "mesh": 2,
+      "name": "pCube169_lambert2_0"
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ]
+}
