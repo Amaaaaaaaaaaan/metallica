@@ -14,8 +14,9 @@ const SaveRecordingDialog = ({ recordingUrl, onSave, onCancel }) => {
       dataUrl: recordingUrl,
       dateAdded: new Date().toLocaleString(),
       album: "N/A",
-      cover: "" // Optionally set a cover URL
+      cover: ""
     };
+    console.log("Saving new recording:", newRecording);
     onSave(newRecording);
   };
 

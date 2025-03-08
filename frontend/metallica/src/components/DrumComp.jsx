@@ -1,5 +1,5 @@
 import React, { Suspense, useState, useEffect, useRef } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas,useThree } from "@react-three/fiber";
 import { Environment, OrbitControls, useGLTF, useAnimations, useProgress, Html } from "@react-three/drei";
 import * as THREE from "three";
 import styles from "./DrumStyle.module.css";
@@ -121,17 +121,6 @@ function CanvasBackground({ bgImage }) {
           scene.background = texture;
         });
       }
-      if (bgImage.type === "color") {
-        scene.background = new THREE.Color(bgImage.value);
-      } else if (bgImage.type === "image") {
-        new THREE.TextureLoader().load(bgImage.value, (texture) => {
-          texture.encoding = THREE.sRGBEncoding;
-          texture.minFilter = THREE.LinearFilter;
-          texture.magFilter = THREE.LinearFilter;
-          texture.anisotropy = 16;
-          scene.background = texture;
-        });
-      }
     } else {
       scene.background = null;
     }
@@ -147,11 +136,12 @@ function DrumComp() {
   const [isKeyMappingOpen, setIsKeyMappingOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordings, setRecordings] = useState([]);
-  // unsavedRecording holds the Data URL of the new recording (temporary until saved)
+  // unsavedRecording holds the temporary Data URL from a new recording
   const [unsavedRecording, setUnsavedRecording] = useState(null);
   const [bgImage, setBgImage] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isRecordingActive, setIsRecordingActive] = useState(false);
+  // showSaveDialog is controlled by the bottom player’s Save button click
   const [showSaveDialog, setShowSaveDialog] = useState(false);
 
   const activeKeys = useRef(new Set());
@@ -187,7 +177,9 @@ function DrumComp() {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64data = reader.result;
+        console.log("Unsaved recording Data URL:", base64data);
         setUnsavedRecording(base64data);
+        // Do not automatically show the dialog now
       };
       reader.readAsDataURL(blob);
       recordedChunksRef.current = [];
@@ -271,7 +263,6 @@ function DrumComp() {
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       setIsRecordingActive(false);
@@ -288,13 +279,14 @@ function DrumComp() {
     localStorage.setItem("recordings", JSON.stringify(updated));
   };
 
-  // When the SaveRecordingDialog calls onSave, we get the new track object
+  // When the SaveRecordingDialog calls onSave, add the new recording to saved recordings
   const handleSaveUnsaved = (newRecording) => {
     const updatedRecordings = [...recordings, newRecording];
     setRecordings(updatedRecordings);
     localStorage.setItem("recordings", JSON.stringify(updatedRecordings));
     setUnsavedRecording(null);
     setShowSaveDialog(false);
+    console.log("Recording saved in localStorage:", newRecording);
   };
 
   const handleUserGesture = () => {
@@ -409,17 +401,16 @@ function DrumComp() {
           )}
         </div>
       </div>
-      {/* Bottom unsaved preview player: render only if unsavedRecording exists */} 
+      {/* Render UnsavedPreviewBottomPlayer if an unsaved recording exists */}
       {unsavedRecording && (
-       <UnsavedPreviewBottomPlayer
-       recordingUrl={unsavedRecording}
-       onSave={(newRecording) => handleSaveUnsaved(newRecording)}
-       onDiscard={discardUnsaved}
-       onClose={() => {}}
-     />
-     
+        <UnsavedPreviewBottomPlayer
+          recordingUrl={unsavedRecording}
+          onSave={() => setShowSaveDialog(true)}
+          onDiscard={discardUnsaved}
+          onClose={() => {}}
+        />
       )}
-      {/* Save dialog for unsaved recording */} 
+      {/* Render SaveRecordingDialog when showSaveDialog is true */}
       {showSaveDialog && unsavedRecording && (
         <SaveRecordingDialog
           recordingUrl={unsavedRecording}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import './Drumkit.css';
+import './Drumkit.module.css';
 import 'font-awesome/css/font-awesome.min.css';
 import { gsap } from 'gsap';
 import KeyMapping from "./KeyMapping";

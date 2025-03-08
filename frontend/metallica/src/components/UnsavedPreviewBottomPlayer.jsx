@@ -1,23 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import ReactDOM from "react-dom";
-import SaveRecordingDialog from "./SaveRecordingDialog";
 import styles from "./UnsavedPreviewBottomPlayer.module.css";
 
-const UnsavedPreviewBottomPlayer = ({
-  recordingUrl,
-  onSave,      // changed prop name from onFinalSave to onSave
-  onDiscard,
-  onClose,
-}) => {
+const UnsavedPreviewBottomPlayer = ({ recordingUrl, onSave, onDiscard, onClose }) => {
   const audioRef = useRef(new Audio());
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.5);
   const [isDragging, setIsDragging] = useState(false);
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
 
-  // Update audio element's volume when volume changes
+  // Update audio volume when volume changes
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
@@ -27,29 +20,24 @@ const UnsavedPreviewBottomPlayer = ({
   // Setup audio event listeners
   useEffect(() => {
     const audio = audioRef.current;
-
     const updateDuration = () => {
       if (!isNaN(audio.duration) && isFinite(audio.duration)) {
         setDuration(audio.duration);
       }
     };
-
     const updateProgress = () => {
       if (!isDragging) {
         setProgress(audio.currentTime);
       }
     };
-
     const resetPlayer = () => {
       setIsPlaying(false);
       setProgress(0);
     };
-
     audio.addEventListener("loadedmetadata", updateDuration);
     audio.addEventListener("durationchange", updateDuration);
     audio.addEventListener("timeupdate", updateProgress);
     audio.addEventListener("ended", resetPlayer);
-
     return () => {
       audio.removeEventListener("loadedmetadata", updateDuration);
       audio.removeEventListener("durationchange", updateDuration);
@@ -71,7 +59,6 @@ const UnsavedPreviewBottomPlayer = ({
     audio.src = recordingUrl;
     audio.preload = "metadata";
     audio.load();
-
     setTimeout(() => {
       if (isNaN(audio.duration) || !isFinite(audio.duration)) {
         audio.load();
@@ -130,9 +117,9 @@ const UnsavedPreviewBottomPlayer = ({
     setVolume(parseFloat(e.target.value));
   };
 
-  const handleDialogSave = (newTrackData) => {
-    onSave(newTrackData);
-    setShowSaveDialog(false);
+  // When user clicks Save, simply call the onSave callback provided by the parent (DrumComp)
+  const handleClickSave = () => {
+    onSave();
   };
 
   return ReactDOM.createPortal(
@@ -151,7 +138,7 @@ const UnsavedPreviewBottomPlayer = ({
               <span className={styles.trackArtist}>Unknown Artist</span>
             </div>
           </div>
-          {/* Center Section: Controls and Progress */} 
+          {/* Center Section: Controls and Progress */}
           <div className={styles.centerSection}>
             <div className={styles.controlButtons}>
               <button className={styles.iconButton}>🔀</button>
@@ -173,11 +160,11 @@ const UnsavedPreviewBottomPlayer = ({
               <span className={styles.timeText}>{formatTime(duration)}</span>
             </div>
           </div>
-          {/* Right Section: Volume and Save/Discard */} 
+          {/* Right Section: Volume and Save/Discard */}
           <div className={styles.rightSection}>
             <div className={styles.volumeContainer}>
               <span className={styles.volumeIcon}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M3 9v6h4l5 5V4L7 9H3z" />
                 </svg>
               </span>
@@ -191,12 +178,12 @@ const UnsavedPreviewBottomPlayer = ({
                 className={styles.volumeSlider}
               />
               <span className={styles.volumeIcon}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                 </svg>
               </span>
             </div>
-            <button onClick={() => setShowSaveDialog(true)} className={styles.saveButton}>
+            <button onClick={handleClickSave} className={styles.saveButton}>
               Save
             </button>
             <button onClick={onDiscard} className={styles.discardButton}>
@@ -207,13 +194,6 @@ const UnsavedPreviewBottomPlayer = ({
             <button onClick={onClose} className={styles.closeButton}>✖</button>
           )}
         </div>
-      )}
-      {showSaveDialog && recordingUrl && (
-        <SaveRecordingDialog
-          recordingUrl={recordingUrl}
-          onSave={handleDialogSave}
-          onCancel={() => setShowSaveDialog(false)}
-        />
       )}
     </>,
     document.body
