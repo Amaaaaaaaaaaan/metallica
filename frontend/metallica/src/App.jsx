@@ -16,6 +16,8 @@ import { DrumPlayer } from './pages/drumPlayer'
 import { KeyboardPlayer } from './pages/KeyboardPlay'
 import About from './pages/About'
 import SVGDrumkit from './components/Drumkit'
+import HandDrum from './pages/VirtualDrums'
+import Dashboard from './pages/Dashboard'
 function App() {
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -47,6 +49,8 @@ function App() {
   <Route path='/piano' element={<KeyboardPlayer/>}></Route>
   <Route path='/about' element={<About/>}></Route>
   <Route path='/drumkit' element={<SVGDrumkit/>}></Route>
+  <Route path='/virtualdrums' element={<HandDrum/>}></Route>
+  <Route path='/saved' element={<Dashboard/>}></Route>
 
 </Routes>
 </div>

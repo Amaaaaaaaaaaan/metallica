@@ -1,0 +1,137 @@
+.bottomPlayer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background-color: #282828;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+  }
+  
+  .trackInfo {
+    flex: 2;
+    color: #fff;
+  }
+  
+  .title {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  .controls {
+    flex: 3;
+    display: flex;
+    margin-right: 250px;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* Play Button */
+  .playButton {
+    background-color: #1db954;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s;
+  }
+  
+  .playButton:hover {
+    transform: scale(1.1);
+  }
+  
+  /* Container for progress bar and volume controls */
+  .progressVolumeContainer {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 10px;
+  }
+  
+  /* Progress Bar */
+  .progressContainer {
+    flex: 1;
+    height: 8px;
+    background-color: #404040;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .progressBar {
+    height: 100%;
+    background-color: #1db954;
+    border-radius: 4px;
+    width: 0%;
+  }
+  
+  /* Volume Container */
+  .volumeContainer {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .volumeIcon {
+    display: flex;
+    align-items: center;
+    color: #fff;
+  }
+  
+  .volumeSlider {
+    width: 80px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #404040;
+    height: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .volumeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #1db954;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .volumeSlider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #1db954;
+    cursor: pointer;
+    border: none;
+  }
+  
+  /* Time Display */
+  .timeDisplay {
+    color: #ccc;
+    font-size: 0.9rem;
+    min-width: 80px;
+    text-align: center;
+  }
+  
+  /* Close Button */
+  .closeButton {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  

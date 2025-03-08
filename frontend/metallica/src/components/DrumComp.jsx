@@ -1,29 +1,29 @@
 import React, { Suspense, useState, useEffect, useRef } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { Environment, OrbitControls, useGLTF, useAnimations, useProgress, Html } from "@react-three/drei";
-import { TextureLoader } from "three";
+import * as THREE from "three";
 import styles from "./DrumStyle.module.css";
 import KeyMapping from "./KeyMapping";
+import BackgroundPicker from "./BackgroundPicker";
+import SaveRecordingDialog from "./SaveRecordingDialog";
+import UnsavedPreviewBottomPlayer from "./UnsavedPreviewBottomPlayer";
 
 function Loader() {
   const { progress } = useProgress();
   const messages = [
-    "Tuning the drums... 🎵",
+    "Tuning the keyboard... 🎵",
     "Setting up the stage... 🎤",
     "Warming up the sticks... 🥁",
     "Loading beats... 🎶",
     "Almost there... 🔥"
   ];
-
   const [message, setMessage] = useState(messages[0]);
-
   useEffect(() => {
     const interval = setInterval(() => {
       setMessage(messages[Math.floor(Math.random() * messages.length)]);
     }, 2000);
     return () => clearInterval(interval);
   }, []);
-
   return (
     <Html center>
       <div style={{
@@ -60,21 +60,30 @@ function Loader() {
 
 const PRESET_MAPPINGS = {
   Default: {
-    w: "../../public/audios/bass_drum.mp3",
-    a: "../../public/audios/bottom_left_hat.mp3",
-    s: "../../public/audios/center_left_Drum.mp3",
-    d: "../../public/audios/center_right_drum.mp3",
-    q: "../../public/audios/hat+bass.mp3",
-    e: "../../public/audios/left_bottom.mp3",
-    r: "../../public/audios/right_bottom_Drum.mp3",
-    t: "../../public/audios/right_Cymbal.mp3",
-  }
+    w: "/audios/bass_drum.mp3",
+    a: "/audios/bottom_left_hat.mp3",
+    s: "/audios/center_left_Drum.mp3",
+    d: "/audios/center_right_drum.mp3",
+    q: "/audios/hat+bass.mp3",
+    e: "/audios/left_bottom.mp3",
+    r: "/audios/right_bottom_Drum.mp3",
+    t: "/audios/right_Cymbal.mp3",
+  },
+  Alternative: {
+    w: "/audios/alternative_bass.mp3",
+    a: "/audios/alternative_hat.mp3",
+    s: "/audios/alternative_snare.mp3",
+    d: "/audios/alternative_tom.mp3",
+    q: "/audios/alternative_crash.mp3",
+    e: "/audios/alternative_ride.mp3",
+    r: "/audios/alternative_floor_tom.mp3",
+    t: "/audios/alternative_splash.mp3",
+  },
 };
 
 function DrumsModel({ isPlaying }) {
-  const { scene, animations } = useGLTF("../../public/Drums.gltf");
+  const { scene, animations } = useGLTF("/drums.gltf");
   const { actions } = useAnimations(animations, scene);
-
   useEffect(() => {
     if (actions && animations.length > 0) {
       const action = actions[animations[0].name];
@@ -87,31 +96,35 @@ function DrumsModel({ isPlaying }) {
       }
     }
   }, [isPlaying, actions, animations]);
-
   return (
     <primitive
       object={scene}
-      scale={50}
-      position={[0, -1, 0]}
+      scale={5}
+      position={[0, 0, 0]}
       rotation={[0, 0, 0]}
     />
   );
 }
 
-// Updates the scene background with a texture.
 function CanvasBackground({ bgImage }) {
   const { scene } = useThree();
-
   useEffect(() => {
     if (bgImage) {
-      new TextureLoader().load(bgImage, (texture) => {
-        scene.background = texture;
-      });
+      if (bgImage.type === "color") {
+        scene.background = new THREE.Color(bgImage.value);
+      } else if (bgImage.type === "image") {
+        new THREE.TextureLoader().load(bgImage.value, (texture) => {
+          texture.encoding = THREE.sRGBEncoding;
+          texture.minFilter = THREE.LinearFilter;
+          texture.magFilter = THREE.LinearFilter;
+          texture.anisotropy = 16;
+          scene.background = texture;
+        });
+      }
     } else {
       scene.background = null;
     }
   }, [bgImage, scene]);
-
   return null;
 }
 
@@ -122,18 +135,28 @@ function DrumComp() {
   const [volume, setVolume] = useState(1.0);
   const [isKeyMappingOpen, setIsKeyMappingOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  // recordings now holds objects: { url, blob }
   const [recordings, setRecordings] = useState([]);
+  // unsavedRecording holds the Data URL of the new recording (temporary until saved)
+  const [unsavedRecording, setUnsavedRecording] = useState(null);
   const [bgImage, setBgImage] = useState(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isRecordingActive, setIsRecordingActive] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
 
   const activeKeys = useRef(new Set());
   const inactivityTimer = useRef(null);
-
-  // Setup AudioContext and MediaRecorder once.
   const audioContextRef = useRef(null);
   const destRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
+
+  // Load saved recordings from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem("recordings");
+    if (stored) {
+      setRecordings(JSON.parse(stored));
+    }
+  }, []);
 
   useEffect(() => {
     audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
@@ -150,14 +173,19 @@ function DrumComp() {
     };
     mediaRecorderRef.current.onstop = () => {
       const blob = new Blob(recordedChunksRef.current, { type: "audio/webm" });
-      const url = URL.createObjectURL(blob);
-      setRecordings((prev) => [...prev, { url, blob }]);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64data = reader.result;
+        setUnsavedRecording(base64data);
+      };
+      reader.readAsDataURL(blob);
       recordedChunksRef.current = [];
     };
   }, []);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
+      if (showSaveDialog) return;
       const key = event.key.toLowerCase();
       if (keyMappings[key]) {
         if (audioContextRef.current.state === "suspended") {
@@ -165,20 +193,18 @@ function DrumComp() {
         }
         activeKeys.current.add(key);
         setIsAnimating(true);
-
         const audio = new Audio(keyMappings[key]);
         audio.volume = volume;
-
         const sourceNode = audioContextRef.current.createMediaElementSource(audio);
         sourceNode.connect(audioContextRef.current.destination);
         sourceNode.connect(destRef.current);
-
-        audio.play();
+        audio.play().catch(console.error);
         clearTimeout(inactivityTimer.current);
       }
     };
 
     const handleKeyUp = (event) => {
+      if (showSaveDialog) return;
       const key = event.key.toLowerCase();
       activeKeys.current.delete(key);
       if (activeKeys.current.size === 0) {
@@ -194,7 +220,7 @@ function DrumComp() {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [keyMappings, volume]);
+  }, [keyMappings, volume, showSaveDialog]);
 
   const handlePresetChange = (e) => {
     const selectedPreset = e.target.value;
@@ -214,56 +240,62 @@ function DrumComp() {
       recordedChunksRef.current = [];
       mediaRecorderRef.current.start();
       setIsRecording(true);
+      setIsRecordingActive(true);
+      setUnsavedRecording(null);
+    }
+  };
+
+  const pauseRecording = () => {
+    if (mediaRecorderRef.current) {
+      if (mediaRecorderRef.current.state === "recording") {
+        mediaRecorderRef.current.pause();
+        setIsPaused(true);
+      } else if (mediaRecorderRef.current.state === "paused") {
+        mediaRecorderRef.current.resume();
+        setIsPaused(false);
+      }
+      setIsRecordingActive(mediaRecorderRef.current.state === "recording");
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      setIsRecordingActive(false);
     }
+  };
+
+  const discardUnsaved = () => {
+    setUnsavedRecording(null);
   };
 
   const discardRecording = (index) => {
-    setRecordings((prev) =>
-      prev.filter((_, idx) => idx !== index)
-    );
+    const updated = recordings.filter((_, i) => i !== index);
+    setRecordings(updated);
+    localStorage.setItem("recordings", JSON.stringify(updated));
   };
 
-  // Save the recording to your backend using the full URL.
-  const saveRecording = async (index) => {
-    try {
-      const recording = recordings[index];
-      const formData = new FormData();
-      // Replace "dummy-user-id" with your actual user ID from auth or context.
-      formData.append("userId", "dummy-user-id");
-      formData.append("audio", recording.blob, `recording-${Date.now()}.webm`);
-
-      const response = await fetch("http://localhost:8080/audio/upload-audio", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await response.json();
-      console.log("Saved recording:", data);
-    } catch (error) {
-      console.error("Error saving recording:", error);
-    }
+  // When the SaveRecordingDialog calls onSave, we get the new track object
+  const handleSaveUnsaved = (newRecording) => {
+    const updatedRecordings = [...recordings, newRecording];
+    setRecordings(updatedRecordings);
+    localStorage.setItem("recordings", JSON.stringify(updatedRecordings));
+    setUnsavedRecording(null);
+    setShowSaveDialog(false);
   };
 
-  // Update background image from file input.
-  const handleBgChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setBgImage(e.target.result);
-      };
-      reader.readAsDataURL(file);
+  const handleUserGesture = () => {
+    if (window.AudioContext) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === "suspended") {
+        ctx.resume();
+      }
     }
   };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} onClick={handleUserGesture}>
       <div className={styles.canvasContainer}>
         <Canvas
           className={styles.canvas}
@@ -272,36 +304,40 @@ function DrumComp() {
             fov: 50,
             rotation: [-2.7369188843831083, -0.44942295148649, -2.957617815288093]
           }}
+          gl={{
+            outputEncoding: THREE.sRGBEncoding,
+            toneMapping: THREE.ACESFilmicToneMapping,
+            toneMappingExposure: 0.8
+          }}
         >
           <Suspense fallback={<Loader />}>
             <CanvasBackground bgImage={bgImage} />
             <ambientLight intensity={0.6} />
-            <directionalLight position={[2, 2, 2]} intensity={1} />
+            <hemisphereLight skyColor={"#aaaaaa"} groundColor={"#222222"} intensity={0.3} position={[0, 50, 0]} />
+            <directionalLight position={[5, 5, 5]} intensity={0.8} />
             <DrumsModel isPlaying={isAnimating} />
-            <OrbitControls enableZoom={false} enablePan={false} />
+            <OrbitControls enableZoom={true} enablePan={true} />
             <Environment preset="sunset" />
           </Suspense>
         </Canvas>
       </div>
       <div className={styles.controls}>
-        <div className={styles.presetSelector}>
-          <label>Drum Presets:</label>
-          <select onChange={handlePresetChange} value={keyMapping}>
-            {Object.keys(PRESET_MAPPINGS).map((preset) => (
-              <option key={preset} value={preset}>
-                {preset}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className={styles.bgChanger}>
-          <label htmlFor="bg-input">Change Background:</label>
-          <input
-            id="bg-input"
-            type="file"
-            accept="image/*"
-            onChange={handleBgChange}
-          />
+        <div className={styles.settingsContainer}>
+          <div className={styles.presetCard}>
+            <h4>Keyboard Preset</h4>
+            <label>Presets:</label>
+            <select onChange={handlePresetChange} value={keyMapping}>
+              {Object.keys(PRESET_MAPPINGS).map((preset) => (
+                <option key={preset} value={preset}>
+                  {preset}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.backgroundCard}>
+            <h4>Background</h4>
+            <BackgroundPicker setBg={setBgImage} />
+          </div>
         </div>
         <button className={styles.keyMappingButton} onClick={() => setIsKeyMappingOpen(true)}>
           🎹 Configure Keys
@@ -319,22 +355,25 @@ function DrumComp() {
           <button onClick={() => adjustVolume(0.1)}>🔊 Increase</button>
         </div>
         <div className={styles.recordingControls}>
-          <button 
-            onClick={startRecording} 
-            disabled={isRecording} 
-            className={styles.triangleButton}
-            title="Start Recording"
-          >
-            <span className="visually-hidden">Start Recording</span>
-          </button>
-          <button 
-            onClick={stopRecording} 
-            disabled={!isRecording} 
+          {isRecording ? (
+            <button
+              onClick={pauseRecording}
+              className={isPaused ? styles.triangleButton : styles.pauseButton}
+              title={isPaused ? "Resume Recording" : "Pause Recording"}
+            />
+          ) : (
+            <button
+              onClick={startRecording}
+              className={styles.triangleButton}
+              title="Start Recording"
+            />
+          )}
+          <button
+            onClick={stopRecording}
+            disabled={!isRecording}
             className={styles.redCircleButton}
             title="Stop Recording"
-          >
-            <span className="visually-hidden">Stop Recording</span>
-          </button>
+          />
         </div>
         <div className={styles.recordingsScrollable}>
           {recordings.length === 0 ? (
@@ -342,28 +381,40 @@ function DrumComp() {
               Why does it sound so empty? Record something!
             </div>
           ) : (
-            recordings.map((recording, idx) => (
+            recordings.map((item, idx) => (
               <div key={idx} className={styles.recordingItem}>
-                <audio controls src={recording.url} />
-                <button 
-                  onClick={() => discardRecording(idx)} 
+                <audio controls src={item.dataUrl} style={{ width: "100%" }} />
+                <p style={{ color: "#ccc" }}>{item.title}</p>
+                <button
+                  onClick={() => discardRecording(idx)}
                   className={styles.discardButton}
                   title="Discard Recording"
                 >
                   Discard
-                </button>
-                <button 
-                  onClick={() => saveRecording(idx)}
-                  className={styles.saveButton}
-                  title="Save Recording"
-                >
-                  Save Recording
                 </button>
               </div>
             ))
           )}
         </div>
       </div>
+      {/* Bottom unsaved preview player: render only if unsavedRecording exists */} 
+      {unsavedRecording && (
+       <UnsavedPreviewBottomPlayer
+       recordingUrl={unsavedRecording}
+       onSave={(newRecording) => handleSaveUnsaved(newRecording)}
+       onDiscard={discardUnsaved}
+       onClose={() => {}}
+     />
+     
+      )}
+      {/* Save dialog for unsaved recording */} 
+      {showSaveDialog && unsavedRecording && (
+        <SaveRecordingDialog
+          recordingUrl={unsavedRecording}
+          onSave={handleSaveUnsaved}
+          onCancel={() => setShowSaveDialog(false)}
+        />
+      )}
     </div>
   );
 }

@@ -444,3 +444,49 @@ button {
   border-radius: 4px;     /* roundness */
   border: 1px solid #444; /* optional border */
 }
+.recordingControls {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* adjust spacing */
+  /* existing styles... */
+}
+
+.unsavedPreviewInline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.inlineAudio {
+  width: 250px; /* or whatever fits well */
+}
+
+.saveButton {
+  background-color: #1db954;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 14px;
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.saveButton:hover {
+  background-color: #17a44d;
+}
+
+.discardButton {
+  background-color: #dc3545;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 14px;
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.discardButton:hover {
+  background-color: #c82333;
+}
