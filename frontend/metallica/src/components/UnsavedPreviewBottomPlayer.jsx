@@ -9,7 +9,7 @@ const UnsavedPreviewBottomPlayer = ({ recordingUrl, onSave, onDiscard, onClose }
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.5);
   const [isDragging, setIsDragging] = useState(false);
-
+  const user = localStorage.getItem('loggedInUser');
   // Update audio volume when volume changes
   useEffect(() => {
     if (audioRef.current) {
@@ -135,19 +135,17 @@ const UnsavedPreviewBottomPlayer = ({ recordingUrl, onSave, onDiscard, onClose }
             />
             <div className={styles.trackInfo}>
               <span className={styles.trackTitle}>Unsaved Recording</span>
-              <span className={styles.trackArtist}>Unknown Artist</span>
+              <span className={styles.trackArtist}>{user}</span>
             </div>
           </div>
           {/* Center Section: Controls and Progress */}
           <div className={styles.centerSection}>
             <div className={styles.controlButtons}>
-              <button className={styles.iconButton}>🔀</button>
               <button className={styles.iconButton}>⏮</button>
               <button onClick={togglePlay} className={styles.playPauseButton}>
                 {isPlaying ? "⏸" : "▶"}
               </button>
               <button className={styles.iconButton}>⏭</button>
-              <button className={styles.iconButton}>🔁</button>
             </div>
             <div className={styles.progressRow}>
               <span className={styles.timeText}>{formatTime(progress)}</span>

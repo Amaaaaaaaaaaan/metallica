@@ -81,12 +81,15 @@
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background-color: #333;
+    transition: transform 0.2s ease;
   }
   
   .playPauseButton:hover {
-    background-color: #444;
+    transform: scale(1.2);
+    /* Optionally, add a different background color on hover */
+    /* background-color: #444; */
   }
+  
   
   .progressRow {
     display: flex;

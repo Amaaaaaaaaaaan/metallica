@@ -108,7 +108,6 @@ const BottomPlayer = ({ track, onClose }) => {
       const newTime = (clickX / rect.width) * duration;
       setProgress(newTime);
       if (audioRef.current && isDragging) {
-        // While dragging, update currentTime live
         audioRef.current.currentTime = newTime;
       }
     }
@@ -124,6 +123,18 @@ const BottomPlayer = ({ track, onClose }) => {
   // Volume slider change
   const handleVolumeChange = (e) => {
     setVolume(parseFloat(e.target.value));
+  };
+
+  // Download handler: creates a temporary anchor element to download the audio file
+  const handleDownload = () => {
+    if (!track?.dataUrl) return;
+    const link = document.createElement("a");
+    link.href = track.dataUrl;
+    // Suggest a filename based on track title (or default if missing)
+    link.download = `${track.title || "recording"}.webm`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -191,9 +202,11 @@ const BottomPlayer = ({ track, onClose }) => {
         </div>
       </div>
 
-      <button onClick={onClose} className={styles.closeButton}>
-        ✖
-      </button>
+      <div className={styles.extraButtons}>
+        <button onClick={onClose} className={styles.closeButton}>
+          ✖
+        </button>
+      </div>
     </div>
   );
 };
