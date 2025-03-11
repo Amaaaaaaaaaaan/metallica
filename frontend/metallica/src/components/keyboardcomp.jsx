@@ -1,53 +1,25 @@
 import React, { Suspense, useState, useEffect, useRef } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas,useThree } from "@react-three/fiber";
 import { Environment, OrbitControls, useGLTF, useAnimations, useProgress, Html } from "@react-three/drei";
 import * as THREE from "three";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import styles from "./DrumStyle.module.css";
 import KeyMapping from "./KeyMapping";
 import BackgroundPicker from "./BackgroundPicker";
+import SaveRecordingDialog from "./SaveRecordingDialog";
+import UnsavedPreviewBottomPlayer from "./UnsavedPreviewBottomPlayer";
 
+// Loader Component for Suspense fallback
 function Loader() {
   const { progress } = useProgress();
   const messages = [
-    "Tuning the keyborad... 🎵",
+    "Tuning the keyboard... 🎵",
     "Setting up the stage... 🎤",
     "Warming up the sticks... 🥁",
     "Loading beats... 🎶",
     "Almost there... 🔥"
   ];
-
-  function DrumsModel({ isPlaying }) {
-    const { scene, animations } = useGLTF("/piano3d.gltf");
-    const { actions } = useAnimations(animations, scene);
-  
-    // Log the model's position once the scene is loaded
-    useEffect(() => {
-      console.log("Drums model loaded. Position:", scene.position);
-    }, [scene]);
-  
-    useEffect(() => {
-      if (actions && animations.length > 0) {
-        const action = actions[animations[0].name];
-        if (isPlaying) {
-          if (action && !action.isPlaying) {
-            action.play();
-          }
-        } else {
-          action?.stop();
-        }
-      }
-    }, [isPlaying, actions, animations]);
-  
-    return (
-      <primitive
-        object={scene}
-        scale={5}
-        position={[0, 0, 0]}  // Adjust these values as needed
-        rotation={[0, 0, 0]}
-      />
-    );
-  }
-  
   const [message, setMessage] = useState(messages[0]);
 
   useEffect(() => {
@@ -55,35 +27,14 @@ function Loader() {
       setMessage(messages[Math.floor(Math.random() * messages.length)]);
     }, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [messages]);
 
   return (
     <Html center>
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        color: "white",
-        fontSize: "16px",
-        fontWeight: "bold",
-        textAlign: "center"
-      }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "white", fontSize: "16px", fontWeight: "bold", textAlign: "center" }}>
         <p>{message}</p>
-        <div style={{
-          width: "200px",
-          height: "10px",
-          background: "rgba(255, 255, 255, 0.2)",
-          borderRadius: "5px",
-          position: "relative",
-          overflow: "hidden",
-          marginBottom: "10px"
-        }}>
-          <div style={{
-            width: `${progress}%`,
-            height: "100%",
-            background: "white",
-            transition: "width 0.3s"
-          }}></div>
+        <div style={{ width: "200px", height: "10px", background: "rgba(255, 255, 255, 0.2)", borderRadius: "5px", position: "relative", overflow: "hidden", marginBottom: "10px" }}>
+          <div style={{ width: `${progress}%`, height: "100%", background: "white", transition: "width 0.3s" }}></div>
         </div>
         <p>{Math.round(progress)}% Loaded</p>
       </div>
@@ -93,14 +44,14 @@ function Loader() {
 
 const PRESET_MAPPINGS = {
   Default: {
-    w: '/audios/piano/21.mp3',
-    a: '/audios/piano/33.mp3',
-    s: '/audios/piano/45.mp3',
-    d: '/audios/piano/57.mp3',
-    q: '/audios/piano/69.mp3',
-    e: '/audios/piano/81.mp3',
-    r: '/audios/piano/93.mp3',
-    t: '/audios/piano/105.mp3'
+    w: '../../public/audios/piano/21.mp3',
+  a: '../../public/audios/piano/33.mp3',
+  s: '../../public/audios/piano/45.mp3',
+  d: '../../public/audios/piano/57.mp3',
+  q: '../../public/audios/piano/69.mp3',
+  e: '../../public/audios/piano/81.mp3',
+  r: '../../public/audios/pianor/93.mp3',
+  t: '../../public/audios/piano/105.mp3'
   },
   Alternative: {
     w: '/audios/alternative_bass.mp3',
@@ -111,13 +62,14 @@ const PRESET_MAPPINGS = {
     e: '/audios/alternative_ride.mp3',
     r: '/audios/alternative_floor_tom.mp3',
     t: '/audios/alternative_splash.mp3'
-  }
+}
 };
 
+// DrumsModel loads and plays the GLTF model
 function DrumsModel({ isPlaying }) {
   const { scene, animations } = useGLTF("/piano3d.gltf");
   const { actions } = useAnimations(animations, scene);
-
+console.log(scene)
   useEffect(() => {
     if (actions && animations.length > 0) {
       const action = actions[animations[0].name];
@@ -131,20 +83,16 @@ function DrumsModel({ isPlaying }) {
     }
   }, [isPlaying, actions, animations]);
 
-  return (
-    <primitive
-      object={scene}
-      scale={5}
-      position={[0, 0, 0]}
-      rotation={[0, 0, 0]}
-    />
-  );
+  return <primitive object={scene} scale={23} position={[-0, -2, 0.3]} rotation={[0, 4.35, 0]} />;
+  // used to manipulate the position and rotation of the model
 }
 
-// Updated CanvasBackground to handle both color and image backgrounds.
+// CanvasBackground updates the scene's background.
+// When a color is selected, it just updates the background.
+// When an image is selected, you could update additional states if needed.
 function CanvasBackground({ bgImage }) {
   const { scene } = useThree();
-
+  
   useEffect(() => {
     if (bgImage) {
       if (bgImage.type === "color") {
@@ -162,32 +110,47 @@ function CanvasBackground({ bgImage }) {
       scene.background = null;
     }
   }, [bgImage, scene]);
-
+  
   return null;
 }
 
-function Keyboardcomp() {
+// Main DrumComp component
+function DrumComp() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [keyMapping, setKeyMapping] = useState("Default");
   const [keyMappings, setKeyMappings] = useState(PRESET_MAPPINGS["Default"]);
   const [volume, setVolume] = useState(1.0);
   const [isKeyMappingOpen, setIsKeyMappingOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  // Store each recording as an object with { url, approved }
   const [recordings, setRecordings] = useState([]);
-  // bgImage will be an object, for example: { type: "color", value: "#ff0000" } or { type: "image", value: "data:image/..." }
-  const [bgImage, setBgImage] = useState(null);
+  const [unsavedRecording, setUnsavedRecording] = useState(null);
+  
+  // Initialize background as a color; user can switch to image via BackgroundPicker.
+  const [bgImage, setBgImage] = useState({ type: "color", value: "#000000" });
+  
   const [isPaused, setIsPaused] = useState(false);
   const [isRecordingActive, setIsRecordingActive] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
 
   const activeKeys = useRef(new Set());
   const inactivityTimer = useRef(null);
-
   const audioContextRef = useRef(null);
   const destRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
+  const timerIntervalRef = useRef(null);
+  const toastIdRef = useRef(null);
 
+  // Load saved recordings from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem("recordings");
+    if (stored) {
+      setRecordings(JSON.parse(stored));
+    }
+  }, []);
+
+  // Set up AudioContext and MediaRecorder
   useEffect(() => {
     audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
     destRef.current = audioContextRef.current.createMediaStreamDestination();
@@ -196,24 +159,28 @@ function Keyboardcomp() {
     } catch (err) {
       console.error("MediaRecorder error:", err);
     }
-
     mediaRecorderRef.current.ondataavailable = (event) => {
       if (event.data.size > 0) {
         recordedChunksRef.current.push(event.data);
       }
     };
-
     mediaRecorderRef.current.onstop = () => {
       const blob = new Blob(recordedChunksRef.current, { type: "audio/webm" });
-      const url = URL.createObjectURL(blob);
-      // Save the recording with approved flag set to false
-      setRecordings((prev) => [...prev, { url, approved: false }]);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64data = reader.result;
+        console.log("Unsaved recording Data URL:", base64data);
+        setUnsavedRecording(base64data);
+      };
+      reader.readAsDataURL(blob);
       recordedChunksRef.current = [];
     };
   }, []);
 
+  // Keyboard event listeners for playing sounds
   useEffect(() => {
     const handleKeyDown = (event) => {
+      if (showSaveDialog) return;
       const key = event.key.toLowerCase();
       if (keyMappings[key]) {
         if (audioContextRef.current.state === "suspended") {
@@ -221,20 +188,18 @@ function Keyboardcomp() {
         }
         activeKeys.current.add(key);
         setIsAnimating(true);
-
         const audio = new Audio(keyMappings[key]);
         audio.volume = volume;
-
         const sourceNode = audioContextRef.current.createMediaElementSource(audio);
         sourceNode.connect(audioContextRef.current.destination);
         sourceNode.connect(destRef.current);
-
-        audio.play();
+        audio.play().catch(console.error);
         clearTimeout(inactivityTimer.current);
       }
     };
-                              
+
     const handleKeyUp = (event) => {
+      if (showSaveDialog) return;
       const key = event.key.toLowerCase();
       activeKeys.current.delete(key);
       if (activeKeys.current.size === 0) {
@@ -250,7 +215,7 @@ function Keyboardcomp() {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [keyMappings, volume]);
+  }, [keyMappings, volume, showSaveDialog]);
 
   const handlePresetChange = (e) => {
     const selectedPreset = e.target.value;
@@ -265,12 +230,33 @@ function Keyboardcomp() {
     });
   };
 
+  // Timer for recording
+  const startTimer = () => {
+    timerIntervalRef.current = setInterval(() => {
+      setRecordingTime((prevTime) => {
+        const newTime = prevTime + 1;
+        if (toastIdRef.current) {
+          toast.update(toastIdRef.current, { render: `Recording started - Timer: ${newTime}s` });
+        }
+        return newTime;
+      });
+    }, 1000);
+  };
+
   const startRecording = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "inactive") {
       recordedChunksRef.current = [];
       mediaRecorderRef.current.start();
       setIsRecording(true);
-      setIsRecordingActive(true); // Show Pause Button
+      setIsRecordingActive(true);
+      setUnsavedRecording(null);
+      setRecordingTime(0);
+      toastIdRef.current = toast.info(`Recording started - Timer: 0s`, {
+        autoClose: false,
+        theme: "colored",
+        position: "top-center"
+      });
+      startTimer();
     }
   };
 
@@ -279,9 +265,18 @@ function Keyboardcomp() {
       if (mediaRecorderRef.current.state === "recording") {
         mediaRecorderRef.current.pause();
         setIsPaused(true);
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+        if (toastIdRef.current) {
+          toast.update(toastIdRef.current, { render: `Recording paused - Timer: ${recordingTime}s` });
+        }
       } else if (mediaRecorderRef.current.state === "paused") {
         mediaRecorderRef.current.resume();
         setIsPaused(false);
+        if (toastIdRef.current) {
+          toast.update(toastIdRef.current, { render: `Recording resumed - Timer: ${recordingTime}s` });
+        }
+        startTimer();
       }
       setIsRecordingActive(mediaRecorderRef.current.state === "recording");
     }
@@ -291,40 +286,62 @@ function Keyboardcomp() {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      setIsRecordingActive(false); // Reset to Start Button
+      setIsRecordingActive(false);
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+      if (toastIdRef.current) {
+        toast.dismiss(toastIdRef.current);
+        toastIdRef.current = null;
+      }
+      toast.error(`Recording stopped - Timer: ${recordingTime}s`, {
+        autoClose: 3000,
+        position: "top-center",
+        style: { backgroundColor: "#ff4d4d", color: "#fff" }
+      });
     }
   };
 
-  // Discard a recording at a given index
+  const discardUnsaved = () => {
+    setUnsavedRecording(null);
+  };
+
   const discardRecording = (index) => {
-    setRecordings((prev) => prev.filter((_, idx) => idx !== index));
+    const updated = recordings.filter((_, i) => i !== index);
+    setRecordings(updated);
+    localStorage.setItem("recordings", JSON.stringify(updated));
   };
 
-  // Mark a recording as approved
-  const approveRecording = (index) => {
-    setRecordings((prev) => {
-      const newRecordings = [...prev];
-      newRecordings[index].approved = true;
-      return newRecordings;
-    });
+  const handleSaveUnsaved = (newRecording) => {
+    const updatedRecordings = [...recordings, newRecording];
+    setRecordings(updatedRecordings);
+    localStorage.setItem("recordings", JSON.stringify(updatedRecordings));
+    setUnsavedRecording(null);
+    setShowSaveDialog(false);
+    console.log("Recording saved in localStorage:", newRecording);
   };
 
-  // Download a recording that has been approved
-  const downloadRecording = (url, idx) => {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `recording-${idx}.webm`;
-    a.click();
+  const handleUserGesture = () => {
+    if (window.AudioContext) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === "suspended") {
+        ctx.resume();
+      }
+    }
   };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} onClick={handleUserGesture}>
+      {/* SVG overlay that stays fixed regardless of background changes */}
+      <div className={styles.svgOverlay}>
+        <img src="/metallica-svg.svg" alt="Overlay SVG" />
+      </div>
       <div className={styles.canvasContainer}>
         <Canvas
           className={styles.canvas}
           camera={{
-            position: [0, 2, 10],
-            fov: 50
+            position: [-3.0235, 2.4680, -5.7622],
+            fov: 50,
+            rotation: [-2.7369, -0.4494, -2.9576]
           }}
           gl={{
             outputEncoding: THREE.sRGBEncoding,
@@ -338,6 +355,7 @@ function Keyboardcomp() {
             <hemisphereLight skyColor={"#aaaaaa"} groundColor={"#222222"} intensity={0.3} position={[0, 50, 0]} />
             <directionalLight position={[5, 5, 5]} intensity={0.8} />
             <DrumsModel isPlaying={isAnimating} />
+            {/* Display the Metallica logo plane */}
             <OrbitControls enableZoom={true} enablePan={true} />
             <Environment preset="sunset" />
           </Suspense>
@@ -356,17 +374,15 @@ function Keyboardcomp() {
               ))}
             </select>
           </div>
-
           <div className={styles.backgroundCard}>
             <h4>Background</h4>
+            {/* BackgroundPicker should update bgImage appropriately */}
             <BackgroundPicker setBg={setBgImage} />
           </div>
         </div>
-
         <button className={styles.keyMappingButton} onClick={() => setIsKeyMappingOpen(true)}>
           🎹 Configure Keys
         </button>
-
         <div className={`${styles.popupKeyMapping} ${isKeyMappingOpen ? styles.show : ""}`}>
           <button className={styles.closeButton} onClick={() => setIsKeyMappingOpen(false)}>
             ✖
@@ -374,7 +390,6 @@ function Keyboardcomp() {
           <h3>Key Mapping</h3>
           <KeyMapping soundMap={keyMappings} updateSoundMap={setKeyMappings} />
         </div>
-
         <div className={styles.volumeControls}>
           <label>Volume: {Math.round(volume * 100)}%</label>
           <button onClick={() => adjustVolume(-0.1)}>🔉 Decrease</button>
@@ -382,61 +397,27 @@ function Keyboardcomp() {
         </div>
         <div className={styles.recordingControls}>
           {isRecording ? (
-            <button 
-              onClick={pauseRecording} 
-              className={isPaused ? styles.triangleButton : styles.pauseButton}
-              title={isPaused ? "Resume Recording" : "Pause Recording"}
-            >
-            </button>
+            <button onClick={pauseRecording} className={isPaused ? styles.triangleButton : styles.pauseButton} title={isPaused ? "Resume Recording" : "Pause Recording"} />
           ) : (
-            <button 
-              onClick={startRecording} 
-              className={styles.triangleButton}
-              title="Start Recording"
-            >
-            </button>
+            <button onClick={startRecording} className={styles.triangleButton} title="Start Recording" />
           )}
-
-          <button 
-            onClick={stopRecording} 
-            disabled={!isRecording} 
-            className={styles.redCircleButton}
-            title="Stop Recording"
-          >
-          </button>
+          <button onClick={stopRecording} disabled={!isRecording} className={styles.redCircleButton} title="Stop Recording" />
         </div>
-        <div className={styles.recordingsScrollable}>
-          {recordings.length === 0 ? (
-            <div className={styles.emptyMessage}>
-              Why does it sound so empty? Record something!
-            </div>
-          ) : (
-            recordings.map((recording, idx) => (
-              <div key={idx} className={styles.recordingItem}>
-                <audio className="audio" controls src={recording.url} />
-                <button 
-                  onClick={() => discardRecording(idx)} 
-                  className={styles.discardButton}
-                  title="Discard Recording"
-                >
-                  Discard
-                </button>
-                <button 
-                  onClick={() => saveRecording(idx)}
-                  className={styles.saveButton}
-                  title="Save Recording"
-                >
-                  Save Recording
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-
-
       </div>
+      {unsavedRecording && (
+        <UnsavedPreviewBottomPlayer
+          recordingUrl={unsavedRecording}
+          onSave={() => setShowSaveDialog(true)}
+          onDiscard={discardUnsaved}
+          onClose={() => {}}
+        />
+      )}
+      {showSaveDialog && unsavedRecording && (
+        <SaveRecordingDialog recordingUrl={unsavedRecording} onSave={handleSaveUnsaved} onCancel={() => setShowSaveDialog(false)} />
+      )}
+      <ToastContainer />
     </div>
   );
 }
 
-export default Keyboardcomp;
+export default DrumComp;

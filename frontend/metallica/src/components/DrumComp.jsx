@@ -1,5 +1,5 @@
 import React, { Suspense, useState, useEffect, useRef } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { Environment, OrbitControls, useGLTF, useAnimations, useProgress, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { toast, ToastContainer } from "react-toastify";
@@ -9,7 +9,9 @@ import KeyMapping from "./KeyMapping";
 import BackgroundPicker from "./BackgroundPicker";
 import SaveRecordingDialog from "./SaveRecordingDialog";
 import UnsavedPreviewBottomPlayer from "./UnsavedPreviewBottomPlayer";
+import { useSettings } from "./SettingContext.jsx";
 
+// Loader Component for Suspense fallback
 function Loader() {
   const { progress } = useProgress();
   const messages = [
@@ -20,45 +22,20 @@ function Loader() {
     "Almost there... 🔥"
   ];
   const [message, setMessage] = useState(messages[0]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setMessage(messages[Math.floor(Math.random() * messages.length)]);
     }, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [messages]);
+
   return (
     <Html center>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          color: "white",
-          fontSize: "16px",
-          fontWeight: "bold",
-          textAlign: "center"
-        }}
-      >
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "white", fontSize: "16px", fontWeight: "bold", textAlign: "center" }}>
         <p>{message}</p>
-        <div
-          style={{
-            width: "200px",
-            height: "10px",
-            background: "rgba(255, 255, 255, 0.2)",
-            borderRadius: "5px",
-            position: "relative",
-            overflow: "hidden",
-            marginBottom: "10px"
-          }}
-        >
-          <div
-            style={{
-              width: `${progress}%`,
-              height: "100%",
-              background: "white",
-              transition: "width 0.3s"
-            }}
-          ></div>
+        <div style={{ width: "200px", height: "10px", background: "rgba(255,255,255,0.2)", borderRadius: "5px", position: "relative", overflow: "hidden", marginBottom: "10px" }}>
+          <div style={{ width: `${progress}%`, height: "100%", background: "white", transition: "width 0.3s" }}></div>
         </div>
         <p>{Math.round(progress)}% Loaded</p>
       </div>
@@ -66,6 +43,7 @@ function Loader() {
   );
 }
 
+// Preset audio mappings for keys
 const PRESET_MAPPINGS = {
   Default: {
     w: "/audios/bass_drum.mp3",
@@ -89,9 +67,12 @@ const PRESET_MAPPINGS = {
   }
 };
 
+// DrumsModel loads and plays the GLTF model and logs its transform values.
 function DrumsModel({ isPlaying }) {
   const { scene, animations } = useGLTF("/drums.gltf");
   const { actions } = useAnimations(animations, scene);
+  const modelRef = useRef();
+
   useEffect(() => {
     if (actions && animations.length > 0) {
       const action = actions[animations[0].name];
@@ -104,13 +85,39 @@ function DrumsModel({ isPlaying }) {
       }
     }
   }, [isPlaying, actions, animations]);
+
+  // Log the current scale and rotation (x, y, z) each frame
+  useFrame(() => {
+    if (modelRef.current) {
+      const scaleValues = modelRef.current.scale.toArray();
+      const rotationValues = [
+        modelRef.current.rotation.x,
+        modelRef.current.rotation.y,
+        modelRef.current.rotation.z
+      ];
+      console.log("Scale:", scaleValues, "Rotation:", rotationValues);
+    }
+  });
+
+  // Fixed transformation values (use your provided numbers)
+  const fixedPosition = [-0.2, -1.7, 0.3];
+  const fixedRotation = [0, -0.1, 0];
+
   return (
-    <primitive object={scene} scale={5} position={[0, 0, 0]} rotation={[0, 0, 0]} />
+    <primitive
+      ref={modelRef}
+      object={scene}
+      scale={50}
+      position={fixedPosition}
+      rotation={fixedRotation}
+    />
   );
 }
 
+// CanvasBackground updates the scene's background.
 function CanvasBackground({ bgImage }) {
   const { scene } = useThree();
+
   useEffect(() => {
     if (bgImage) {
       if (bgImage.type === "color") {
@@ -128,19 +135,23 @@ function CanvasBackground({ bgImage }) {
       scene.background = null;
     }
   }, [bgImage, scene]);
+
   return null;
 }
 
 function DrumComp() {
+  // Local UI state for DrumComp
   const [isAnimating, setIsAnimating] = useState(false);
   const [keyMapping, setKeyMapping] = useState("Default");
   const [keyMappings, setKeyMappings] = useState(PRESET_MAPPINGS["Default"]);
-  const [volume, setVolume] = useState(1.0);
+
+  // Use shared settings from context
+  const { volume, setVolume, bgImage, setBgImage, audioContext } = useSettings();
+
   const [isKeyMappingOpen, setIsKeyMappingOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordings, setRecordings] = useState([]);
   const [unsavedRecording, setUnsavedRecording] = useState(null);
-  const [bgImage, setBgImage] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isRecordingActive, setIsRecordingActive] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -148,14 +159,12 @@ function DrumComp() {
 
   const activeKeys = useRef(new Set());
   const inactivityTimer = useRef(null);
-  const audioContextRef = useRef(null);
   const destRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
   const timerIntervalRef = useRef(null);
   const toastIdRef = useRef(null);
 
-  // Load saved recordings from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem("recordings");
     if (stored) {
@@ -164,8 +173,12 @@ function DrumComp() {
   }, []);
 
   useEffect(() => {
-    audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-    destRef.current = audioContextRef.current.createMediaStreamDestination();
+    // Only run when audioContext is defined
+    if (!audioContext) return;
+    if (audioContext.state === "suspended") {
+      audioContext.resume();
+    }
+    destRef.current = audioContext.createMediaStreamDestination();
     try {
       mediaRecorderRef.current = new MediaRecorder(destRef.current.stream);
     } catch (err) {
@@ -187,22 +200,22 @@ function DrumComp() {
       reader.readAsDataURL(blob);
       recordedChunksRef.current = [];
     };
-  }, []);
+  }, [audioContext]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (showSaveDialog) return;
       const key = event.key.toLowerCase();
       if (keyMappings[key]) {
-        if (audioContextRef.current.state === "suspended") {
-          audioContextRef.current.resume();
+        if (audioContext.state === "suspended") {
+          audioContext.resume();
         }
         activeKeys.current.add(key);
         setIsAnimating(true);
         const audio = new Audio(keyMappings[key]);
         audio.volume = volume;
-        const sourceNode = audioContextRef.current.createMediaElementSource(audio);
-        sourceNode.connect(audioContextRef.current.destination);
+        const sourceNode = audioContext.createMediaElementSource(audio);
+        sourceNode.connect(audioContext.destination);
         sourceNode.connect(destRef.current);
         audio.play().catch(console.error);
         clearTimeout(inactivityTimer.current);
@@ -226,7 +239,7 @@ function DrumComp() {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [keyMappings, volume, showSaveDialog]);
+  }, [keyMappings, volume, showSaveDialog, audioContext]);
 
   const handlePresetChange = (e) => {
     const selectedPreset = e.target.value;
@@ -241,7 +254,6 @@ function DrumComp() {
     });
   };
 
-  // Start the timer interval and update the persistent toast message each second
   const startTimer = () => {
     timerIntervalRef.current = setInterval(() => {
       setRecordingTime((prevTime) => {
@@ -262,7 +274,6 @@ function DrumComp() {
       setIsRecordingActive(true);
       setUnsavedRecording(null);
       setRecordingTime(0);
-      // Create a persistent toast with autoClose disabled
       toastIdRef.current = toast.info(`Recording started - Timer: 0s`, {
         autoClose: false,
         theme: "colored",
@@ -301,7 +312,6 @@ function DrumComp() {
       setIsRecordingActive(false);
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
-      // Dismiss the persistent toast and show a new error toast
       if (toastIdRef.current) {
         toast.dismiss(toastIdRef.current);
         toastIdRef.current = null;
@@ -344,13 +354,17 @@ function DrumComp() {
 
   return (
     <div className={styles.container} onClick={handleUserGesture}>
+      {/* Fixed SVG overlay */}
+      <div className={styles.svgOverlay}>
+        <img src="/metallica-svg.svg" alt="Overlay SVG" />
+      </div>
       <div className={styles.canvasContainer}>
         <Canvas
           className={styles.canvas}
           camera={{
-            position: [-3.0235463847913526, 2.4680071247329516, -5.762152603378366],
+            position: [-3.0235, 2.4680, -5.7622],
             fov: 50,
-            rotation: [-2.7369188843831083, -0.44942295148649, -2.957617815288093]
+            rotation: [-2.7369, -0.4494, -2.9576]
           }}
           gl={{
             outputEncoding: THREE.sRGBEncoding,
@@ -384,6 +398,7 @@ function DrumComp() {
           </div>
           <div className={styles.backgroundCard}>
             <h4>Background</h4>
+            {/* BackgroundPicker will update the shared bgImage */}
             <BackgroundPicker setBg={setBgImage} />
           </div>
         </div>
@@ -433,11 +448,7 @@ function DrumComp() {
         />
       )}
       {showSaveDialog && unsavedRecording && (
-        <SaveRecordingDialog
-          recordingUrl={unsavedRecording}
-          onSave={handleSaveUnsaved}
-          onCancel={() => setShowSaveDialog(false)}
-        />
+        <SaveRecordingDialog recordingUrl={unsavedRecording} onSave={handleSaveUnsaved} onCancel={() => setShowSaveDialog(false)} />
       )}
       <ToastContainer />
     </div>

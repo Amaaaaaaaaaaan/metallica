@@ -1,92 +1,104 @@
-// backend/routes/audioRoutes.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const multer = require('multer');
-const { GridFsStorage } = require('multer-gridfs-storage');
-const mongoose = require('mongoose');
-const Grid = require('gridfs-stream');
-const User = require('../models/user'); // Adjust path if needed
-require('dotenv').config();
+const multer = require("multer");
+const mongoose = require("mongoose");
+const { GridFSBucket } = require("mongodb");
+const User = require("../models/user"); // Adjust path if needed
+require("dotenv").config();
 
-const mongoURI = process.env.MONGO_CONN;
+const mongoURI = process.env.MONGO_CONN || "mongodb://localhost:27017/music-app";
 
-// Create a separate mongoose connection for GridFS.
-const conn = mongoose.createConnection(mongoURI);
-
-let gfs;
-conn.once('open', function () {
-  gfs = Grid(conn.db, mongoose.mongo);
-  gfs.collection('audios'); // Files will be stored in the 'audios' bucket
-  console.log("GridFS initialized with bucket 'audios'");
+// ✅ Create Mongoose Connection
+const conn = mongoose.createConnection(mongoURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 });
 
-// Configure GridFsStorage using the new API style that returns an object.
-const storage = new GridFsStorage({
-  url: mongoURI,
-  file: (req, file) => {
-    console.log("Uploading file:", file.originalname);
-    return {
-      filename: `${Date.now()}-${file.originalname}`,
-      bucketName: 'audios',
-      metadata: { contentType: file.mimetype }
-    };
-  }
+// ✅ Initialize GridFSBucket
+let gridFSBucket;
+conn.once("open", () => {
+  gridFSBucket = new GridFSBucket(conn.db, { bucketName: "audios" });
+  console.log("✅ GridFS initialized with bucket 'audios'");
 });
 
+// ✅ Configure Multer for file uploads (no multer-gridfs-storage)
+const storage = multer.memoryStorage(); // Store file in memory before uploading to GridFS
 const upload = multer({ storage });
 
-// POST route: Upload an audio file
-// Expect the field name "audio" and a "userId" in the form-data.
-router.post('/upload-audio', upload.single('audio'), async (req, res) => {
+// ✅ Upload an Audio File
+router.post("/upload-audio", upload.single("audio"), async (req, res) => {
   try {
     const { userId } = req.body;
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
-    // Find the user by id.
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Save a reference to the file in the user's audios array.
-    user.audios.push({
-      filename: req.file.filename
-      // uploadDate will default to Date.now in your schema.
+    // ✅ Upload file manually to GridFS
+    const uploadStream = gridFSBucket.openUploadStream(req.file.originalname, {
+      metadata: { contentType: req.file.mimetype }
+    });
+    uploadStream.end(req.file.buffer);
+
+    uploadStream.on("finish", async () => {
+      // Save file reference in user's profile
+      user.audios.push({ filename: req.file.originalname });
+      await user.save();
+
+      res.json({ success: true, filename: req.file.originalname });
     });
 
-    await user.save();
-    res.json({ success: true, file: req.file, audios: user.audios });
+    uploadStream.on("error", (err) => {
+      console.error("Upload error:", err);
+      res.status(500).json({ error: "File upload failed" });
+    });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// GET route: Stream an audio file by its ObjectId.
-router.get('/audio/:id', (req, res) => {
-  let fileId;
+// ✅ Stream an Audio File
+router.get("/audio/:filename", async (req, res) => {
   try {
-    fileId = new mongoose.Types.ObjectId(req.params.id);
-  } catch (err) {
-    return res.status(400).json({ error: "Invalid file id" });
-  }
-  gfs.files.findOne({ _id: fileId }, (err, file) => {
-    if (err || !file) {
-      return res.status(404).json({ error: "File not found" });
-    }
-    res.set('Content-Type', file.metadata && file.metadata.contentType ? file.metadata.contentType : 'audio/mpeg');
-    const readStream = gfs.createReadStream({ _id: file._id });
+    const file = await conn.db.collection("audios.files").findOne({ filename: req.params.filename });
+    if (!file) return res.status(404).json({ error: "File not found" });
+
+    res.set("Content-Type", file.metadata?.contentType || "audio/mpeg");
+    const readStream = gridFSBucket.openDownloadStreamByName(req.params.filename);
     readStream.pipe(res);
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
-// Optional: GET route to list all audio files stored in GridFS.
-router.get('/list-audios', (req, res) => {
-  gfs.files.find().toArray((err, files) => {
-    if (err || !files || files.length === 0) {
-      return res.status(404).json({ error: "No files found" });
-    }
+// ✅ List All Uploaded Audio Files
+router.get("/list-audios", async (req, res) => {
+  try {
+    const files = await conn.db.collection("audios.files").find().toArray();
+    if (!files || files.length === 0) return res.status(404).json({ error: "No files found" });
+
     res.json(files);
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ✅ Delete an Audio File
+router.delete("/audio/:filename", async (req, res) => {
+  try {
+    const file = await conn.db.collection("audios.files").findOne({ filename: req.params.filename });
+    if (!file) return res.status(404).json({ error: "File not found" });
+
+    await gridFSBucket.delete(file._id);
+    res.json({ message: "File deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error deleting file" });
+  }
 });
 
 module.exports = router;

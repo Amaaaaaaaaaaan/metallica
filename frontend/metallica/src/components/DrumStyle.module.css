@@ -8,9 +8,9 @@ html, body {
 
 /* --- Root Variables --- */
 :root {
-  --bg-dark: #1c1c1c;     /* Dark background for the container */
-  --bg-panel: #2c2c2c;    /* Slightly lighter for panels */
-  --bg-box: #3a3a3a;      /* Inner box background */
+  --bg-dark:#000 ;     /* Dark background for the container */
+  --bg-panel: #171717;    /* Slightly lighter for panels */
+  --bg-box: #302F2F;      /* Inner box background */
   --text-color: #eeeeee;
   --accent: #ff6f61;
   --border-radius: 10px;
@@ -143,6 +143,29 @@ button {
   align-items: center;
   text-align: start;
   gap: 10px;
+}
+.svgOverlay {
+  position: absolute;
+  top: 40px; /* adjust as needed */
+  left: 33%;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.svgOverlay img {
+  width: 350px; /* adjust size as needed */
+  height: auto;
+}
+.textOverlay {
+  position: absolute;
+  top: 40px;
+  left: 33%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 24px;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .triangleButton:hover {
