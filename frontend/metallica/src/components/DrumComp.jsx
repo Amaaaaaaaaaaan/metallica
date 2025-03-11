@@ -95,7 +95,7 @@ function DrumsModel({ isPlaying }) {
         modelRef.current.rotation.y,
         modelRef.current.rotation.z
       ];
-      console.log("Scale:", scaleValues, "Rotation:", rotationValues);
+      // console.log("Scale:", scaleValues, "Rotation:", rotationValues);
     }
   });
 

@@ -10,19 +10,56 @@ function Dashboard() {
   const [sortOption, setSortOption] = useState("dateDesc"); // default sort
 
   useEffect(() => {
-    const stored = localStorage.getItem("recordings");
-    if (stored) {
-      setRecordings(JSON.parse(stored));
+    // Fetch recordings from the DB instead of local storage
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      console.error("User not logged in!");
+      return;
     }
+    fetch(`http://localhost:8080/audio/user-audios/${userId}`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch recordings");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setRecordings(data);
+      })
+      .catch((err) => {
+        console.error("Error fetching recordings:", err);
+      });
   }, []);
 
   const discardRecording = (index) => {
-    const updated = recordings.filter((_, i) => i !== index);
-    setRecordings(updated);
-    localStorage.setItem("recordings", JSON.stringify(updated));
-    if (activeTrack && recordings[index]?.dataUrl === activeTrack.dataUrl) {
-      setActiveTrack(null);
-    }
+    const track = recordings[index];
+    // Call backend DELETE API to remove the audio file
+    fetch(
+      `http://localhost:8080/audio/${track.filename}?userId=${localStorage.getItem(
+        "userId"
+      )}`,
+      {
+        method: "DELETE",
+      }
+    )
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to delete recording from DB");
+        }
+        return res.json();
+      })
+      .then(() => {
+        // Remove the track from UI after successful deletion
+        const updated = recordings.filter((_, i) => i !== index);
+        setRecordings(updated);
+        // Clear activeTrack if it's the one being discarded
+        if (activeTrack && activeTrack.filename === track.filename) {
+          setActiveTrack(null);
+        }
+      })
+      .catch((err) => {
+        console.error("Error deleting recording:", err);
+      });
   };
 
   // Create a sorted version of the recordings array based on sortOption
@@ -70,33 +107,35 @@ function Dashboard() {
           <button className={styles.downloadButton}></button>
           {/* MUI Sort Options with custom styling */}
           <div className={styles.sortContainer}>
-          <FormControl
-  variant="outlined"
-  size="small"
-  sx={{
-    backgroundColor: "#fff",
-    borderRadius: 1,
-    minWidth: 150,
-    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-  }}
->
-  <InputLabel id="sort-select-label" sx={{ color: "#fff",top : -12 ,fontSize:21}}>
-    Sort by
-  </InputLabel>
-  <Select
-    labelId="sort-select-label"
-    id="sort-select"
-    value={sortOption}
-    label="Sort by"
-    onChange={(e) => setSortOption(e.target.value)}
-    sx={{ color: "#000", backgroundColor: "#fff" }}
-  >
-    <MenuItem value="dateDesc">Date (Newest First)</MenuItem>
-    <MenuItem value="dateAsc">Date (Oldest First)</MenuItem>
-    <MenuItem value="alphabetical">Alphabetical</MenuItem>
-  </Select>
-</FormControl>
-
+            <FormControl
+              variant="outlined"
+              size="small"
+              sx={{
+                backgroundColor: "#fff",
+                borderRadius: 1,
+                minWidth: 150,
+                boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              <InputLabel
+                id="sort-select-label"
+                sx={{ color: "#fff", top: -12, fontSize: 21 }}
+              >
+                Sort by
+              </InputLabel>
+              <Select
+                labelId="sort-select-label"
+                id="sort-select"
+                value={sortOption}
+                label="Sort by"
+                onChange={(e) => setSortOption(e.target.value)}
+                sx={{ color: "#000", backgroundColor: "#fff" }}
+              >
+                <MenuItem value="dateDesc">Date (Newest First)</MenuItem>
+                <MenuItem value="dateAsc">Date (Oldest First)</MenuItem>
+                <MenuItem value="alphabetical">Alphabetical</MenuItem>
+              </Select>
+            </FormControl>
           </div>
         </div>
 
@@ -108,7 +147,11 @@ function Dashboard() {
             <span className={styles.headerDate}>Date</span>
             <span className={styles.headerAudio}>Audio</span>
           </div>
-          <div className={styles.trackListBody}>
+          {/* Enable scrolling on this container */}
+          <div
+            className={styles.trackListBody}
+            style={{ maxHeight: "70vh", overflowY: "auto" }}
+          >
             {sortedRecordings.map((track, idx) => (
               <div
                 key={idx}
@@ -118,14 +161,16 @@ function Dashboard() {
               >
                 <span className={styles.trackHash}>{idx + 1}</span>
                 <span className={styles.trackTitle}>
-                  {track.title || `Recording ${idx + 1}`}
+                {track?.title || (track?.filename ? track.filename.replace(/\.[^/.]+$/, "") : "No Track Selected")}
                   {track.description && (
                     <span className={styles.trackDescription}>
                       {track.description}
                     </span>
                   )}
                 </span>
-                <span className={styles.trackAlbum}>{track.album || "N/A"}</span>
+                <span className={styles.trackAlbum}>
+                  {track.album || "N/A"}
+                </span>
                 <div className={styles.dateDiscardCell}>
                   <span className={styles.trackDate}>
                     {track.dateAdded || "Unknown date"}
@@ -141,7 +186,25 @@ function Dashboard() {
                   </button>
                 </div>
                 <div className={styles.audioColumn}>
-                  <span style={{ color: "#1db954" }}>▶</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Set activeTrack with a streaming source from the DB
+                      setActiveTrack({
+                        ...track,
+                        src: `http://localhost:8080/audio/${track.filename}`,
+                      });
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#1db954",
+                      fontSize: "1.2rem",
+                    }}
+                  >
+                    ▶
+                  </button>
                 </div>
               </div>
             ))}

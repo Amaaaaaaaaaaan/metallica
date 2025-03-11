@@ -50,21 +50,21 @@ const BottomPlayer = ({ track, onClose }) => {
     };
   }, [isDragging]);
 
-  // Update audio src when track changes
+  // Update audio src when track changes using track.src (streaming URL)
   useEffect(() => {
     const audio = audioRef.current;
-    if (!track?.dataUrl) {
+    if (!track?.src) {
       audio.src = "";
       setIsPlaying(false);
       setProgress(0);
       setDuration(0);
       return;
     }
-    audio.src = track.dataUrl;
+    audio.src = track.src;
     audio.preload = "metadata";
     audio.load();
 
-    // Force-check duration after short delay in case browser is slow
+    // Force-check duration after a short delay in case browser is slow
     setTimeout(() => {
       if (isNaN(audio.duration) || !isFinite(audio.duration)) {
         audio.load();
@@ -127,9 +127,9 @@ const BottomPlayer = ({ track, onClose }) => {
 
   // Download handler: creates a temporary anchor element to download the audio file
   const handleDownload = () => {
-    if (!track?.dataUrl) return;
+    if (!track?.src) return;
     const link = document.createElement("a");
-    link.href = track.dataUrl;
+    link.href = track.src;
     // Suggest a filename based on track title (or default if missing)
     link.download = `${track.title || "recording"}.webm`;
     document.body.appendChild(link);
@@ -140,7 +140,9 @@ const BottomPlayer = ({ track, onClose }) => {
   return (
     <div className={styles.bottomPlayer}>
       <div className={styles.trackInfo}>
-        <div className={styles.title}>{track?.title || "No Track Selected"}</div>
+      <div className={styles.title}>
+  {track?.title || (track?.filename ? track.filename.replace(/\.[^/.]+$/, "") : "No Track Selected")}
+</div>
       </div>
 
       <div className={styles.controls}>
@@ -162,7 +164,6 @@ const BottomPlayer = ({ track, onClose }) => {
           </div>
           <div className={styles.volumeContainer}>
             <span className={styles.volumeIcon}>
-              {/* Volume Low SVG */}
               <svg
                 width="16"
                 height="16"
@@ -183,7 +184,6 @@ const BottomPlayer = ({ track, onClose }) => {
               className={styles.volumeSlider}
             />
             <span className={styles.volumeIcon}>
-              {/* Volume High SVG */}
               <svg
                 width="16"
                 height="16"
@@ -206,6 +206,9 @@ const BottomPlayer = ({ track, onClose }) => {
         <button onClick={onClose} className={styles.closeButton}>
           ✖
         </button>
+        {/* <button onClick={handleDownload} className={styles.downloadButton}>
+          ⬇
+        </button> */}
       </div>
     </div>
   );

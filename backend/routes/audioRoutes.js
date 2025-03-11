@@ -11,7 +11,7 @@ const mongoURI = process.env.MONGO_CONN || "mongodb://localhost:27017/music-app"
 // ✅ Create Mongoose Connection
 const conn = mongoose.createConnection(mongoURI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
 });
 
 // ✅ Initialize GridFSBucket
@@ -21,50 +21,65 @@ conn.once("open", () => {
   console.log("✅ GridFS initialized with bucket 'audios'");
 });
 
-// ✅ Configure Multer for file uploads (no multer-gridfs-storage)
-const storage = multer.memoryStorage(); // Store file in memory before uploading to GridFS
+// ✅ Configure Multer for file uploads (using memory storage)
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
-
-// ✅ Upload an Audio File
 router.post("/upload-audio", upload.single("audio"), async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId, title, description } = req.body;
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
+    // Find the user by id.
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // ✅ Upload file manually to GridFS
-    const uploadStream = gridFSBucket.openUploadStream(req.file.originalname, {
-      metadata: { contentType: req.file.mimetype }
+    // Check that a title is provided; otherwise, fallback to a default title.
+    const providedTitle = title && title.trim().length > 0 ? title.trim() : "Untitled Recording";
+    // Sanitize title: replace spaces with underscores and remove unwanted characters if needed.
+    const sanitizedTitle = providedTitle.replace(/\s+/g, "_");
+    // Extract extension from mimetype (for example: "webm" from "audio/webm")
+    const fileExt = req.file.mimetype.split("/")[1] || "webm";
+    // Create a custom filename using the title
+    const customFileName = `${sanitizedTitle}.${fileExt}`;
+
+    console.log("Custom file name:", customFileName);
+
+    // Upload file manually to GridFS using the custom file name.
+    const uploadStream = gridFSBucket.openUploadStream(customFileName, {
+      metadata: { 
+        contentType: req.file.mimetype,
+        title: providedTitle, // store the original title in metadata if needed
+      },
     });
     uploadStream.end(req.file.buffer);
 
     uploadStream.on("finish", async () => {
-      // Save file reference in user's profile
-      user.audios.push({ filename: req.file.originalname });
+      // Save file reference in user's profile including the description.
+      user.audios.push({ 
+        filename: customFileName,
+        description: description || "",
+      });
       await user.save();
 
-      res.json({ success: true, filename: req.file.originalname });
+      res.json({ success: true, filename: customFileName });
     });
 
     uploadStream.on("error", (err) => {
       console.error("Upload error:", err);
       res.status(500).json({ error: "File upload failed" });
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
+
 // ✅ Stream an Audio File
-router.get("/audio/:filename", async (req, res) => {
+router.get("/:filename", async (req, res) => {
   try {
     const file = await conn.db.collection("audios.files").findOne({ filename: req.params.filename });
     if (!file) return res.status(404).json({ error: "File not found" });
-
     res.set("Content-Type", file.metadata?.contentType || "audio/mpeg");
     const readStream = gridFSBucket.openDownloadStreamByName(req.params.filename);
     readStream.pipe(res);
@@ -73,6 +88,7 @@ router.get("/audio/:filename", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 // ✅ List All Uploaded Audio Files
 router.get("/list-audios", async (req, res) => {
@@ -87,17 +103,39 @@ router.get("/list-audios", async (req, res) => {
   }
 });
 
-// ✅ Delete an Audio File
-router.delete("/audio/:filename", async (req, res) => {
+router.delete("/:filename", async (req, res) => {
   try {
-    const file = await conn.db.collection("audios.files").findOne({ filename: req.params.filename });
+    const filename = req.params.filename;
+    const file = await conn.db.collection("audios.files").findOne({ filename });
     if (!file) return res.status(404).json({ error: "File not found" });
-
     await gridFSBucket.delete(file._id);
+    // Optionally remove file reference from user document if needed.
+    const { userId } = req.query;
+    if (userId) {
+      await User.updateOne(
+        { _id: userId },
+        { $pull: { audios: { filename } } }
+      );
+    }
     res.json({ message: "File deleted successfully" });
   } catch (err) {
-    console.error(err);
+    console.error("Error deleting file:", err);
     res.status(500).json({ error: "Error deleting file" });
+  }
+});
+
+// Add this new route in your audioRoutes.js
+router.get("/user-audios/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    
+    // Assuming the recordings are stored in the user's audios array.
+    res.json(user.audios);
+  } catch (err) {
+    console.error("Error fetching user recordings:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 

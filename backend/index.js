@@ -15,9 +15,10 @@ app.get('/ping', (req, res) => {
 
 app.use(bodyParser.json());
 app.use(cors());
+
 app.use('/auth', authRouter);
 
-// Mount the GridFS audio routes
+// Mount the GridFS audio routes under /audio
 app.use('/audio', audioRoutes);
 
 app.listen(PORT, () => {
