@@ -43,7 +43,7 @@ export default function Button({ label = "play", className, onClick }) {
           mouseX.set(e.clientX - bounds.x - bounds.width / 2);
           mouseY.set(e.clientY - bounds.y - bounds.height / 2);
         }}
-        className={`${styles.button} ${className}`}
+        className={`${styles.customButton} ${className}`}
         onClick={onClick}
       >
         <motion.div

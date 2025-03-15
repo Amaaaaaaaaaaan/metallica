@@ -1,15 +1,26 @@
+// MusicGenerator.jsx
 import React, { useState, useEffect } from "react";
-import Button from "../components/Button"; // Import the custom Button component
+// If you have a custom Button component, import it here:
+import Button from "../components/Button"; 
 
-function MusicGenerator({ selectedStyles }) {
+/**
+ * Props:
+ *  - selectedStyles (string): The music styles or prompt to generate from
+ *  - onAudioGenerated (function): Callback to pass the generated audio URL back to the parent
+ */
+function MusicGenerator({ selectedStyles, onAudioGenerated }) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Optionally track the audio URL locally if you want to debug or confirm it's generated
   const [audioUrl, setAudioUrl] = useState(null);
 
+  // Whenever selectedStyles changes, update our local prompt
   useEffect(() => {
     setPrompt(selectedStyles);
   }, [selectedStyles]);
 
+  // Trigger the Hugging Face MusicGen API call
   const generateMusic = async () => {
     if (!prompt) {
       alert("Please enter a music description.");
@@ -17,23 +28,36 @@ function MusicGenerator({ selectedStyles }) {
     }
 
     setLoading(true);
-    setAudioUrl(null); // Clear previous audio
+    setAudioUrl(null); // Clear previous audio URL
 
     try {
-      const response = await fetch("https://api-inference.huggingface.co/models/facebook/musicgen-small", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer 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`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ inputs: prompt }),
-      });
+      // 1) Call the Hugging Face MusicGen API
+      const response = await fetch(
+        "https://api-inference.huggingface.co/models/facebook/musicgen-small",
+        {
+          method: "POST",
+          headers: {
+            // Replace with your own token or environment variable
+            Authorization: `Bearer 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`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ inputs: prompt }),
+        }
+      );
 
-      if (!response.ok) throw new Error("Failed to generate music");
+      if (!response.ok) {
+        throw new Error("Failed to generate music");
+      }
 
+      // 2) Convert response to a Blob, then to a local URL
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
+
+      // 3) Save the URL locally (optional) AND pass it to the parent
       setAudioUrl(url);
+      if (onAudioGenerated) {
+        onAudioGenerated(url);
+      }
     } catch (error) {
       console.error("Error generating music:", error);
       alert("Failed to generate music. Please try again.");
@@ -45,8 +69,11 @@ function MusicGenerator({ selectedStyles }) {
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>METALLICA AI MUSIC GENERATOR</h1>
-      <h3 style={styles.subtitle}>No musical experience? No problem! We've got everything you need to create amazing tunes!</h3>
+      <h3 style={styles.subtitle}>
+        No musical experience? No problem! We&apos;ve got everything you need to create amazing tunes!
+      </h3>
 
+      {/* Prompt input field */}
       <input
         type="text"
         value={prompt}
@@ -54,52 +81,56 @@ function MusicGenerator({ selectedStyles }) {
         placeholder="Enter music description"
         style={styles.input}
       />
+
+      {/* Generate button */}
       <div style={styles.buttonContainer}>
-        <Button onClick={generateMusic} label="Generate" className={styles.generateButton}>
+        <Button onClick={generateMusic} style={styles.generateButton}>
           {loading ? "Generating..." : "Generate"}
         </Button>
       </div>
 
+      {/* Loading message */}
       {loading && <div style={styles.loading}>Generating music, please wait...</div>}
 
+      {/* Debug info or confirmation (NO audio player here) */}
       {audioUrl && (
-        <div style={styles.audioContainer}>
-          <audio controls autoPlay style={styles.audio}>
-            <source src={audioUrl} type="audio/mpeg" />
-            Your browser does not support the audio element.
-          </audio>
-        </div>
+        <p style={{ color: "#FF4D94", marginTop: "10px" }}>
+          Audio generated! Your custom player will handle playback.
+        </p>
       )}
     </div>
   );
 }
 
+export default MusicGenerator;
+
+/** Inline styles (optional). Adjust as you wish or replace with CSS modules. */
 const styles = {
   container: {
     textAlign: "center",
     padding: "20px",
-    backgroundColor: "#121212", // Black background
+    backgroundColor: "#121212",
     borderRadius: "10px",
-    boxShadow: "0 4px 15px rgba(255, 77, 148, 0.6)", // Pinkish-purple glow
+    boxShadow: "0 4px 15px rgba(255, 77, 148, 0.6)",
     maxWidth: "600px",
     margin: "auto",
     marginTop: "50px",
   },
   title: {
     fontSize: "2.5em",
-    color: "#FF4D94", // Pinkish-purple
+    color: "#FF4D94",
     fontWeight: "bold",
   },
   subtitle: {
     fontSize: "1.2em",
-    color: "#FF4D94", // Pinkish-purple
+    color: "#FF4D94",
     marginBottom: "20px",
   },
   input: {
     padding: "12px",
     width: "90%",
     borderRadius: "8px",
-    border: "2px solid #FF4D94", // Pinkish-purple border
+    border: "2px solid #FF4D94",
     backgroundColor: "#222",
     color: "#fff",
     fontSize: "16px",
@@ -115,36 +146,9 @@ const styles = {
     width: "100%",
     maxWidth: "300px",
   },
-  button: {
-    padding: "12px 25px",
-    borderRadius: "8px",
-    border: "none",
-    backgroundColor: "#FF4D94",
-    color: "#fff",
-    cursor: "pointer",
-    fontSize: "18px",
-    fontWeight: "bold",
-    transition: "0.3s",
-  },
-  buttonHover: {
-    backgroundColor: "#E60073", // Slightly darker shade on hover
-  },
   loading: {
     marginTop: "10px",
-    color: "#FF4D94", // Pinkish-purple for loading text
+    color: "#FF4D94",
     fontWeight: "bold",
   },
-  audioContainer: {
-    marginTop: "20px",
-    padding: "10px",
-    backgroundColor: "#222",
-    borderRadius: "8px",
-    boxShadow: "0 2px 10px rgba(255, 77, 148, 0.3)", // Subtle glow
-  },
-  audio: {
-    width: "100%",
-    borderRadius: "5px",
-  },
 };
-
-export default MusicGenerator;

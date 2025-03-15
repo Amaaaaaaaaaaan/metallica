@@ -1,68 +1,195 @@
+"use client";
+
 import React from "react";
-import { motion } from "framer-motion";
-import "./Aboutus.module.css";
+import { motion, useScroll } from "framer-motion";
+import styles from "./Aboutus.module.css";
+export default function ScrollLinkedComponent() {
+  const { scrollYProgress } = useScroll();
 
-const AboutUs = () => {
   return (
-    <div className="about-container">
-      {/* Background Overlay */}
-      <div className="background-overlay"></div>
-
-      {/* Content */}
-      <div className="about-content">
-        {/* Title */}
-        <motion.h1
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          className="about-title"
-        >
-          About Us
-        </motion.h1>
-
-        {/* Description */}
-        <motion.p
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1, delay: 0.5 }}
-          className="about-text"
-        >
-          We are committed to providing high-quality services with a dedicated team of experts.
-        </motion.p>
-
-        {/* Image Section */}
-        <motion.div
-          className="about-image"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, delay: 0.8 }}
-        >
-          <img src={teamImage} alt="Our Team" />
-        </motion.div>
-
-        {/* Highlights */}
-        <motion.div
-          className="about-highlights"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 1 }}
-        >
-          <div className="highlight">
-            <h3>10+</h3>
-            <p>Years of Experience</p>
-          </div>
-          <div className="highlight">
-            <h3>50+</h3>
-            <p>Expert Team Members</p>
-          </div>
-          <div className="highlight">
-            <h3>100+</h3>
-            <p>Successful Projects</p>
-          </div>
-        </motion.div>
+    <>
+      {/* Scroll Indicator */}
+      <motion.div
+        id="scroll-indicator"
+        style={{
+          scaleX: scrollYProgress,
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 5,
+          transformOrigin: "0%",
+          backgroundColor: "var(--hue-1,rgb(219, 113, 52))",
+          zIndex: 1000,
+        }}
+      />
+      
+      {/* Scrollable Container */}
+      <div className={styles.scrollContainer}>
+        <Content />
       </div>
-    </div>
+    </>
   );
-};
+}
 
-export default AboutUs;
+function Content() {
+  return (
+    <article style={{ maxWidth: 500, padding: "150px 20px" }}>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam ac rhoncus quam.
+      </p>
+      <p>
+        Fringilla quam urna. Cras turpis elit, euismod eget ligula quis, imperdiet sagittis justo.
+        In viverra fermentum ex ac vestibulum. Aliquam eleifend nunc a luctus porta.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Maecenas quis elementum nulla, in lacinia nisl. Ut rutrum fringilla aliquet.
+        Pellentesque auctor vehicula malesuada.
+      </p>
+      <p>
+        Sed sem nisi, luctus consequat ligula in, congue sodales nisl. Vestibulum bibendum
+        at erat sit amet pulvinar.
+      </p>
+      <p>
+        Pellentesque pharetra leo vitae tristique rutrum. Donec ut volutpat ante, ut suscipit leo.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Sed sem nisi, luctus consequat ligula in, congue sodales nisl. Vestibulum bibendum
+        at erat sit amet pulvinar.
+      </p>
+      <p>
+        Pellentesque pharetra leo vitae tristique rutrum. Donec ut volutpat ante, ut suscipit leo.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Sed sem nisi, luctus consequat ligula in, congue sodales nisl. Vestibulum bibendum
+        at erat sit amet pulvinar.
+      </p>
+      <p>
+        Pellentesque pharetra leo vitae tristique rutrum. Donec ut volutpat ante, ut suscipit leo.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Sed sem nisi, luctus consequat ligula in, congue sodales nisl. Vestibulum bibendum
+        at erat sit amet pulvinar.
+      </p>
+      <p>
+        Pellentesque pharetra leo vitae tristique rutrum. Donec ut volutpat ante, ut suscipit leo.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Sed sem nisi, luctus consequat ligula in, congue sodales nisl. Vestibulum bibendum
+        at erat sit amet pulvinar.
+      </p>
+      <p>
+        Pellentesque pharetra leo vitae tristique rutrum. Donec ut volutpat ante, ut suscipit leo.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Sed sem nisi, luctus consequat ligula in, congue sodales nisl. Vestibulum bibendum
+        at erat sit amet pulvinar.
+      </p>
+      <p>
+        Pellentesque pharetra leo vitae tristique rutrum. Donec ut volutpat ante, ut suscipit leo.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Sed sem nisi, luctus consequat ligula in, congue sodales nisl. Vestibulum bibendum
+        at erat sit amet pulvinar.
+      </p>
+      <p>
+        Pellentesque pharetra leo vitae tristique rutrum. Donec ut volutpat ante, ut suscipit leo.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Sed sem nisi, luctus consequat ligula in, congue sodales nisl. Vestibulum bibendum
+        at erat sit amet pulvinar.
+      </p>
+      <p>
+        Pellentesque pharetra leo vitae tristique rutrum. Donec ut volutpat ante, ut suscipit leo.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Sed sem nisi, luctus consequat ligula in, congue sodales nisl. Vestibulum bibendum
+        at erat sit amet pulvinar.
+      </p>
+      <p>
+        Pellentesque pharetra leo vitae tristique rutrum. Donec ut volutpat ante, ut suscipit leo.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Sed sem nisi, luctus consequat ligula in, congue sodales nisl. Vestibulum bibendum
+        at erat sit amet pulvinar.
+      </p>
+      <p>
+        Pellentesque pharetra leo vitae tristique rutrum. Donec ut volutpat ante, ut suscipit leo.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Morbi ut scelerisque nibh. Integer auctor, massa non dictum tristique,
+        elit metus efficitur elit, ac pretium sapien nisl nec ante.
+      </p>
+      <p>
+        In et ex ultricies, mollis mi in, euismod dolor. Quisque convallis ligula non magna
+        efficitur tincidunt.
+      </p>
+      <p>
+        Pellentesque id lacus pulvinar elit pulvinar pretium ac non urna. Proin sit amet lacus mollis,
+        semper massa ut, rutrum mi.
+      </p>
+      <p>
+        Vestibulum cursus ipsum tellus, eu tincidunt neque tincidunt a.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam ac rhoncus quam.
+      </p>
+      <p>
+        Fringilla quam urna. Cras turpis elit, euismod eget ligula quis, imperdiet sagittis justo.
+        In viverra fermentum ex ac vestibulum. Aliquam eleifend nunc a luctus porta.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Maecenas quis elementum nulla, in lacinia nisl. Ut rutrum fringilla aliquet.
+        Pellentesque auctor vehicula malesuada.
+      </p>
+      <p>
+        Sed sem nisi, luctus consequat ligula in, congue sodales nisl. Vestibulum bibendum
+        at erat sit amet pulvinar.
+      </p>
+      <p>
+        Pellentesque pharetra leo vitae tristique rutrum. Donec ut volutpat ante, ut suscipit leo.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Morbi ut scelerisque nibh. Integer auctor, massa non dictum tristique,
+        elit metus efficitur elit, ac pretium sapien nisl nec ante.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam ac rhoncus quam.
+      </p>
+      <p>
+        Fringilla quam urna. Cras turpis elit, euismod eget ligula quis, imperdiet sagittis justo.
+        In viverra fermentum ex ac vestibulum. Aliquam eleifend nunc a luctus porta.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Maecenas quis elementum nulla, in lacinia nisl. Ut rutrum fringilla aliquet.
+        Pellentesque auctor vehicula malesuada.
+      </p>
+      <p>
+        Sed sem nisi, luctus consequat ligula in, congue sodales nisl. Vestibulum bibendum
+        at erat sit amet pulvinar.
+      </p>
+      <p>
+        Pellentesque pharetra leo vitae tristique rutrum. Donec ut volutpat ante, ut suscipit leo.
+      </p>
+      <h2>Sub-header</h2>
+      <p>
+        Morbi ut scelerisque nibh. Integer auctor, massa non dictum tristique,
+        elit metus efficitur elit, ac pretium sapien nisl nec ante.
+      </p>
+    </article>
+  );
+}

@@ -101,7 +101,9 @@ const BottomPlayer = ({ track, onClose }) => {
   };
 
   const handleProgressUpdate = (e) => {
-    const progressBar = e.currentTarget.closest(`.${styles.progressContainer}`) || document.querySelector(`.${styles.progressContainer}`);
+    const progressBar =
+      e.currentTarget.closest(`.${styles.progressContainer}`) ||
+      document.querySelector(`.${styles.progressContainer}`);
     if (progressBar) {
       const rect = progressBar.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
@@ -126,23 +128,36 @@ const BottomPlayer = ({ track, onClose }) => {
   };
 
   // Download handler: creates a temporary anchor element to download the audio file
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!track?.src) return;
-    const link = document.createElement("a");
-    link.href = track.src;
-    // Suggest a filename based on track title (or default if missing)
-    link.download = `${track.title || "recording"}.webm`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      const response = await fetch(track.src);
+      if (!response.ok) throw new Error("Failed to fetch audio file");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      // Suggest a filename; adjust extension as needed
+      link.download = `${track.title || "recording"}.flac`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download error:", error);
+    }
   };
+  
 
   return (
     <div className={styles.bottomPlayer}>
       <div className={styles.trackInfo}>
-      <div className={styles.title}>
-  {track?.title || (track?.filename ? track.filename.replace(/\.[^/.]+$/, "") : "No Track Selected")}
-</div>
+        <div className={styles.title}>
+          {track?.title ||
+            (track?.filename
+              ? track.filename.replace(/\.[^/.]+$/, "")
+              : "No Track Selected")}
+        </div>
       </div>
 
       <div className={styles.controls}>
@@ -197,18 +212,28 @@ const BottomPlayer = ({ track, onClose }) => {
           </div>
         </div>
 
-        <div className={styles.timeDisplay}>
-          {formatTime(progress)} / {formatTime(duration)}
+        <div className={styles.timeDownloadContainer}>
+          <div className={styles.timeDisplay}>
+            {formatTime(progress)} / {formatTime(duration)}
+          </div>
+          
+       
+          
         </div>
+        <div><div
+            onClick={handleDownload}
+            style={{ cursor: "pointer" }} 
+            className={styles.downloadButton}
+            title="Download"
+          >
+           <svg fill="#1DB954" width="24" height="24" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 537.794 537.795" xml:space="preserve" stroke="#1DB954"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <g> <path d="M463.091,466.114H74.854c-11.857,0-21.497,9.716-21.497,21.497v28.688c0,11.857,9.716,21.496,21.497,21.496h388.084 c11.857,0,21.496-9.716,21.496-21.496v-28.688C484.665,475.677,474.949,466.114,463.091,466.114z"></path> <path d="M253.94,427.635c4.208,4.208,9.716,6.35,15.147,6.35c5.508,0,11.016-2.142,15.147-6.35l147.033-147.033 c8.339-8.338,8.339-21.955,0-30.447l-20.349-20.349c-8.339-8.339-21.956-8.339-30.447,0l-75.582,75.659V21.497 C304.889,9.639,295.173,0,283.393,0h-28.688c-11.857,0-21.497,9.562-21.497,21.497v284.044l-75.658-75.659 c-8.339-8.338-22.032-8.338-30.447,0l-20.349,20.349c-8.338,8.338-8.338,22.032,0,30.447L253.94,427.635z"></path> </g> </g> </g></svg>
+          </div></div>
       </div>
 
       <div className={styles.extraButtons}>
         <button onClick={onClose} className={styles.closeButton}>
           ✖
         </button>
-        {/* <button onClick={handleDownload} className={styles.downloadButton}>
-          ⬇
-        </button> */}
       </div>
     </div>
   );

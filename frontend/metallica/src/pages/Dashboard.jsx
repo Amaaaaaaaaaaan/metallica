@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import styles from "../styles/Dashboard.module.css";
 import BottomPlayer from "../components/BottomPlayer";
 import Sidenav from "../components/sidenav";
@@ -8,7 +8,7 @@ function Dashboard() {
   const [recordings, setRecordings] = useState([]);
   const [activeTrack, setActiveTrack] = useState(null);
   const [sortOption, setSortOption] = useState("dateDesc"); // default sort
-
+  const user=localStorage.getItem('loggedInUser');
   useEffect(() => {
     // Fetch recordings from the DB instead of local storage
     const userId = localStorage.getItem("userId");
@@ -62,22 +62,22 @@ function Dashboard() {
       });
   };
 
-  // Create a sorted version of the recordings array based on sortOption
-  const sortedRecordings = [...recordings].sort((a, b) => {
-    if (sortOption === "alphabetical") {
-      const titleA = (a.title || "Recording").toLowerCase();
-      const titleB = (b.title || "Recording").toLowerCase();
-      if (titleA < titleB) return -1;
-      if (titleA > titleB) return 1;
-      return 0;
-    } else if (sortOption === "dateAsc") {
-      // oldest first
-      return new Date(a.dateAdded) - new Date(b.dateAdded);
-    } else {
-      // dateDesc: newest first
-      return new Date(b.dateAdded) - new Date(a.dateAdded);
-    }
-  });
+  // Use useMemo for sorting recordings based on the sortOption
+  const sortedRecordings = useMemo(() => {
+    return [...recordings].sort((a, b) => {
+      if (sortOption === "alphabetical") {
+        const titleA = (a.title || a.filename || "Recording").toLowerCase();
+        const titleB = (b.title || b.filename || "Recording").toLowerCase();
+        return titleA.localeCompare(titleB);
+      } else if (sortOption === "dateAsc") {
+        // Oldest first using uploadDate
+        return new Date(a.uploadDate) - new Date(b.uploadDate);
+      } else {
+        // dateDesc: newest first using uploadDate
+        return new Date(b.uploadDate) - new Date(a.uploadDate);
+      }
+    });
+  }, [recordings, sortOption]);
 
   return (
     <>
@@ -92,7 +92,7 @@ function Dashboard() {
           </div>
           <div className={styles.headerText}>
             <span className={styles.playlistLabel}>Playlist</span>
-            <h1 className={styles.playlistTitle}>Liked Songs</h1>
+            <h1 className={styles.playlistTitle}>{user}'s Songs</h1>
             <div className={styles.playlistSubtitle}>
               <span className={styles.username}>You</span>
               <span className={styles.separator}>•</span>
@@ -156,12 +156,20 @@ function Dashboard() {
               <div
                 key={idx}
                 className={styles.trackRow}
-                onClick={() => setActiveTrack(track)}
+                onClick={() =>
+                  setActiveTrack({
+                    ...track,
+                    src: `http://localhost:8080/audio/${track.filename}`,
+                  })
+                }
                 style={{ cursor: "pointer" }}
               >
                 <span className={styles.trackHash}>{idx + 1}</span>
                 <span className={styles.trackTitle}>
-                {track?.title || (track?.filename ? track.filename.replace(/\.[^/.]+$/, "") : "No Track Selected")}
+                  {track?.title ||
+                    (track?.filename
+                      ? track.filename.replace(/\.[^/.]+$/, "")
+                      : "No Track Selected")}
                   {track.description && (
                     <span className={styles.trackDescription}>
                       {track.description}
@@ -173,7 +181,9 @@ function Dashboard() {
                 </span>
                 <div className={styles.dateDiscardCell}>
                   <span className={styles.trackDate}>
-                    {track.dateAdded || "Unknown date"}
+                    {track.uploadDate
+                      ? new Date(track.uploadDate).toLocaleDateString()
+                      : "Unknown date"}
                   </span>
                   <button
                     onClick={(e) => {
@@ -189,7 +199,6 @@ function Dashboard() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Set activeTrack with a streaming source from the DB
                       setActiveTrack({
                         ...track,
                         src: `http://localhost:8080/audio/${track.filename}`,

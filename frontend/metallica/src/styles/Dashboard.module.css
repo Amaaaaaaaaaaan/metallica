@@ -1,19 +1,43 @@
 .dashboardContainer {
-    background-color: #121212;
-    color: #fff;
-    min-height: 100vh;
-    width: 100vw;
-    padding:20px 20px 20px 100px;
-    font-family: 'Poppins', sans-serif;
-  }
-  .trackListBody {
-    max-height: 70vh;
-    overflow-y: auto;
-  }
+  background-color: #121212;
+  color: #fff;
+  min-height: 100vh;
+  width: 100vw;
+  padding: 260px 20px 20px 100px;
+  font-family: 'Poppins', sans-serif;
+  overflow-y: auto;  /* Ensures scrolling when content is too big */
+}
 
-  .trackListBody::-webkit-scrollbar {
-    width: 10px;
-  }
+
+
+.trackListBody {
+  height: 70vh;          /* or max-height: 70vh */
+  overflow-y: scroll;
+  /* Make sure the content actually exceeds this height to see the scrollbar */
+}
+
+/* Custom Scrollbar (WebKit Browsers) */
+.trackListBody::-webkit-scrollbar {
+  width: 6px;               /* Thin scrollbar width */
+  background-color: #121212; /* Background color behind the scrollbar */
+}
+
+.trackListBody::-webkit-scrollbar-thumb {
+  background-color: #444; /* Color of the scrollbar thumb */
+  border-radius: 3px;     /* Rounded edges */
+}
+
+.trackListBody::-webkit-scrollbar-thumb:hover {
+  background-color: #666; /* Slightly lighter on hover */
+}
+
+/* For Firefox, you can add: */
+.trackListBody {
+  scrollbar-width: thin;          /* Makes the scrollbar thin */
+  scrollbar-color: #444 #121212;  /* thumb color | track color */
+}
+
+  
   
   /* Header Section */
   .headerSection {
