@@ -8,7 +8,7 @@ function Sidenav() {
     <nav className={styles.navbar}>
       <ul className={styles.navbarNav}>
         {/* start logo */}
-        <li className={styles.logo}>
+        <li className={`${styles.firstNavItem} ${styles.logo}`}>
           <a href="#" className={styles.navLink}>
             <svg
               width="800px"

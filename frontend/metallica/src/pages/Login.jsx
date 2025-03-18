@@ -42,12 +42,11 @@ function Login() {
         handleSuccess(message);
         localStorage.setItem('token', jwtToken);
         localStorage.setItem('loggedInUser', name);
-        localStorage.setItem('userId', userId);  // Store the userId for later use
+        localStorage.setItem('userId', userId);
         setTimeout(() => {
           navigate('/home');
         }, 1000);
       } else if (error) {
-        // Handle error with possible details if available
         const details = error?.details?.[0]?.message;
         handleError(details || "Error logging in");
       } else if (!success) {
@@ -61,6 +60,12 @@ function Login() {
 
   return (
     <div className={styles.background}>
+      {/* Background video */}
+      <video className={styles.video} autoPlay loop muted>
+        <source src="/bgVid.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      
       <div className={styles.container}>
         <h1 className={styles.title}>Login</h1>
         <form onSubmit={handleLogin}>

@@ -1,0 +1,142 @@
+body {
+    background-color: black;
+    color: white;
+    transition: background-color 0.3s ease, color 0.3s ease;
+     
+  }
+  
+  :local(.localMargin) {
+    margin-top: -280px;
+  }
+  
+  .body.light-mode {
+    background-color: white;
+    color: black;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .instrumentImage {
+    width: 45px;
+    height: 45px;
+    margin-right: 10px;
+    
+  }
+  
+  /* Control buttons */
+  .controls {
+    margin: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .SQbutton {
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 12px;
+    background: #333333;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .SQbutton:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Beat grid */
+  .grid {
+    width: 800px;
+    height: 200px;
+    position: absolute;
+    padding: 10px;
+    left: 0;
+    right: 0;
+    margin: auto;
+  }
+  
+  .row {
+    display: flex;
+    justify-content: center;
+  }
+  
+  /* Beat buttons */
+  .beat {
+    border-radius: 10px;
+    margin: 5px;
+    cursor: pointer;
+    width: 50px;   /* or any larger value */
+    height: 45px;  /* or any larger value */
+    margin: 2px;
+    border: none;
+    transition: background-color 0.2s ease; 
+  }
+  
+  .ticked {
+    background-color: white;
+    border-color: white;
+  }
+  
+  .beat:hover {
+    transform: scale(1.06);
+  }
+  
+  /* Active/click effect: shrink a bit to give feedback */
+  .beat:active {
+    transform: scale(0.94);
+  }
+  
+  /* Optional: highlight the current step with a 'pulse' animation */
+  .ticked {
+    animation: pulse 0.6s infinite;
+  }
+  
+  /* Keyframes for the pulse animation */
+  @keyframes pulse {
+    0%   { transform: scale(1);   }
+    50%  { transform: scale(1.15); }
+    100% { transform: scale(1);   }
+  }
+
+  .bpmIncreament,.bpmDecrement{
+    margin: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .bpmIncrement button,.bpmDecrement button{
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 2px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border-radius: 10px;
+  }
+
+  .bpmIncrement button:hover,.bpmDecrement button:hover{
+    transform: scale(1.05);
+  }
+
+  .bpmIncrement button:active,.bpmDecrement button:active{
+    transform: scale(0.94);
+  }
+
+  .bpmIncrement button{
+    margin-right: 10px;
+  }
+
+  .bpmDecrement button{
+    margin-left: 10px;
+  }
+
+  .bpmIncrement button{
+    margin-right: 10px;
+  }
+
+  .bpmDecrement button{
+    margin-left: 10px;
+  }
+
+ 

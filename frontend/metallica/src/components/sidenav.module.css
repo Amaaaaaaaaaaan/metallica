@@ -3,7 +3,7 @@
   font-family: 'Open Sans';
   --text-primary: #b6b6b6;
   --text-secondary: #ececec;
-  --bg-primary: #23232e;
+  --bg-primary: #181818;
   --bg-secondary: #141418;
   --transition-speed: 600ms;
 }
@@ -20,7 +20,7 @@
   flex-direction: column;
   transition: background-color 0.3s;
   z-index: 1000;
-  border-right: 2px solid #56044ef3; /* Default border */
+  border-right: 5px solid #008080; /* Default border */
 }
 
 /* NAVBAR NAV (UL) */
@@ -35,13 +35,18 @@
   margin: 0;
   padding: 0;
 }
+.firstNavItem{
+
+  border-bottom:5px solid #008080;
+
+}
 
 /* HOVER: EXPAND & SHADOW */
 .navbar:hover {
   position: absolute;        /* Expands on hover */
-  box-shadow: 8px 0px 30px #78076df3;
+  box-shadow: 8px 0px 30px #008080;
   transition: all 0.3s ease;
-  border-right: 2px solid #78076df3; /* Highlighted border */
+  border-right: 2px solid  #008080; /* Highlighted border */
 }
 
 /* NAV ITEM (LI) */
@@ -57,8 +62,9 @@
 
 /* If you previously used margin-top: auto on the last item, remove it */
 .lastNavItem {
-  margin-top: 40px; /* If you still want a gap, keep it. Otherwise, remove. */
+  margin-top:32px;
   width: 100%;
+  border-top:5px solid #008080;
 }
 
 /* NAV LINKS (A) */
