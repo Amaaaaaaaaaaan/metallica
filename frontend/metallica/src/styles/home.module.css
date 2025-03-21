@@ -1,8 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
 /* General Variables */
 :root {
-    --background-dark: #0d0d0d;
+    /* --background-dark: #0d0d0d; */
     --foreground-dark: #222;
-    --accent-teal: #ffffff;
+    --accent-teal: #285584f2;
     --text-light: #f1f1f1;
     --text-muted: #cccccc;
     --card-bg: #1a1a1a;
@@ -22,7 +24,7 @@
     left: 0;
     width: 100vw; /* Full viewport width */
     height: 100vh; /* Full viewport height */
-    background-color: var(--background-dark);
+    background-color: #0d0d0d;
     color: var(--text-light);
     overflow-y: scroll;
     overflow-x: hidden;
@@ -41,7 +43,7 @@
     border: 2px solid var(--foreground-dark);
   }
   .container::-webkit-scrollbar-thumb:hover {
-    background-color: #a35a00;
+    background-color: #5b7694f2;
   }
   
   /* Hero Section */
@@ -63,6 +65,7 @@
   
   .heroContent {
     animation: fadeInUp 1s ease-out;
+    margin-left: 60px;
   }
   
   @keyframes fadeInUp {
@@ -86,19 +89,33 @@
     margin-bottom: 2rem;
   }
   
-  .ctaButton {
-    background-color: var(--accent-teal);
-    border: none;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    color: #0d0d0d;
+  .ctaButton{
+    /* Button Size & Font */
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 12px 24px;
     cursor: pointer;
-    border-radius: 4px;
-    transition: background-color var(--transition-speed);
+    
+    /* Colors */
+    background-color: #285584f2; /* Orange color */
+    color: #fff;              /* White text */
+    border: 3px solid #000;   /* Bold black border */
+    
+    /* Shadow & Transition */
+    box-shadow: 4px 4px 0 #000;       /* Strong black shadow */
+    transition: all 0.1s ease-in-out; /* Smooth hover transition */
   }
   
   .ctaButton:hover {
-    background-color: #00a38d;
+    /* Slightly move up-left on hover to make the shadow appear bigger */
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 #000;
+  }
+  
+  .ctaButton:active {
+    /* When clicked, move it down-right a bit to mimic a 'pressed' look */
+    transform: translate(0, 0);
+    box-shadow: 2px 2px 0 #000;
   }
   
   /* HOW IT WORKS (Features) SECTION */
@@ -118,13 +135,15 @@
     
     padding: 0.75rem;
     margin-bottom: 1rem;
-    display: flex;
+    display: ruby;
     justify-content: center;
   }
   
   .featuresIcon {
     color: var(--accent-teal);
     font-size: 2rem;
+    margin-right: 20px;
+    font-size: 35px;
   }
   
   .features h2 {
@@ -184,7 +203,7 @@
   /* About Section */
   .about {
     padding: 4rem 2rem;
-    background-color: var(--background-dark);
+    background-color: #0d0d0d;
     text-align: center;
   }
   
@@ -251,7 +270,6 @@
     margin: 0.5rem 0;
   }
   
-  
   .reviewsHeader p {
     font-size: 1rem;
     color: #cccccc;
@@ -311,7 +329,7 @@
     background-color:#141418;
     font-size: 0.9rem;
     color: #777;
-    border-top: 5px solid #008080;
+    border-top: 5px solid #285584f2;
   }
   
   /* Responsive */
@@ -363,12 +381,11 @@
   }
   
   .footerIcons a:hover {
-    color: #00a38d; /* Slight hover effect */
+    color: #6e98c4f2; /* Slight hover effect */
   }
   
   .footerContainer p {
     margin: 0;
     font-size: 0.95rem;
   }
-  
   

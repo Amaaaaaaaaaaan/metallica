@@ -1,0 +1,44 @@
+/* Fix white background and blue button */
+.snx-dark-green .shepherd-content,
+.snx-dark-green .shepherd-header,
+.snx-dark-green .shepherd-text,
+.snx-dark-green .shepherd-footer {
+  background: #025555 !important;
+  color: white !important;
+  border: none !important;
+}
+
+/* Button fixes */
+.snx-dark-green .shepherd-button {
+  background: #027777 !important;
+  color: white !important;
+  border-radius: 4px !important;
+  padding: 6px 15px !important;
+  margin-left: 8px !important;
+}
+
+/* Primary button (Finish) */
+.snx-dark-green .shepherd-button.shepherd-button-primary {
+  background: #028787 !important;
+  font-weight: 500 !important;
+}
+
+/* Hover states */
+.snx-dark-green .shepherd-button:hover {
+  background: #016767 !important;
+}
+.snx-dark-green .shepherd-button.shepherd-button-primary:hover {
+  background: #015959 !important;
+}
+
+/* Text content */
+.snx-dark-green .shepherd-text {
+    padding: 12px 49px !important;
+    font-size: 1.1rem !important;
+}
+
+/* Footer spacing */
+.snx-dark-green .shepherd-footer {
+  padding-top: 20px !important;
+  justify-content: flex-end !important;
+}

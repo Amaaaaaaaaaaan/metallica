@@ -1,9 +1,19 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import styles from './sidenav.module.css';
-// import Contact from './contact';
-// import About from './about';
 
 function Sidenav() {
+  const navigate = useNavigate();
+
+  // Define a hook for handling logout
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('loggedInUser');
+    toast.success('User Logged out');
+    setTimeout(() => navigate('/login'), 1000);
+  };
+
   return (
     <nav className={styles.navbar}>
       <ul className={styles.navbarNav}>
@@ -75,7 +85,7 @@ function Sidenav() {
 
         {/* 3 */}
         <li className={styles.navItem}>
-          <a href="/contact" className={styles.navLink}>
+          <a href="/about" className={styles.navLink}>
             <svg
               stroke="currentColor"
               fill="currentColor"
@@ -91,9 +101,16 @@ function Sidenav() {
           </a>
         </li>
 
-        {/* 4 */}
+        {/* 4 - Logout (Using anchor with onClick) */}
         <li className={styles.navItem}>
-          <a href="/contact" className={styles.navLink}>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              handleLogout();
+            }}
+            className={styles.navLink}
+          >
             <svg
               stroke="currentColor"
               fill="currentColor"
@@ -109,7 +126,6 @@ function Sidenav() {
           </a>
         </li>
 
-        {/* 5 */}
         <li className={styles.navItem}>
           <a href="/contact" className={styles.navLink}>
             <svg
@@ -127,7 +143,6 @@ function Sidenav() {
           </a>
         </li>
 
-        {/* 6 */}
         <li className={styles.navItem}>
           <a href="/contact" className={styles.navLink}>
             <svg
@@ -146,7 +161,7 @@ function Sidenav() {
           </a>
         </li>
 
-        {/* last */}
+        {/* Last item (Theme Button) */}
         <li className={`${styles.lastNavItem} ${styles.logo}`} id="themeButton">
           <a href="#" className={styles.navLink}>
             <svg

@@ -16,6 +16,7 @@ import HandDrum from './pages/VirtualDrums';
 import Dashboard from './pages/Dashboard';
 import { SettingsProvider } from './components/SettingContext.jsx';
 import Beatboxer from './pages/beatsq.jsx';
+import LandingPage from './pages/home';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -32,7 +33,7 @@ function App() {
           <Route path='/login' element={<Login />} />
           <Route path='/Signup' element={<Signup />} />
           <Route path='/instrument' element={<Instruments />} />
-          <Route path='/home' element={<PrivateRoute element={<Home />} />} />
+          <Route path='/home' element={<PrivateRoute element={<LandingPage />} />} />
           <Route path='/Music-Gen' element={<MusicGenerator />} />
           <Route path='/test' element={<PromptSelector />} />
           <Route path='/drums' element={<DrumPlayer />} />

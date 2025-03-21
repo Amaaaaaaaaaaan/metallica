@@ -28,7 +28,7 @@ function Login() {
     try {
       const url = `http://localhost:8080/auth/login`;
       const response = await fetch(url, {
-        method: "POST",
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -48,7 +48,7 @@ function Login() {
         }, 1000);
       } else if (error) {
         const details = error?.details?.[0]?.message;
-        handleError(details || "Error logging in");
+        handleError(details || 'Error logging in');
       } else if (!success) {
         handleError(message);
       }
@@ -68,28 +68,34 @@ function Login() {
       
       <div className={styles.container}>
         <h1 className={styles.title}>Login</h1>
-        <form onSubmit={handleLogin}>
-          <div>
-            <label htmlFor='email'>Email</label>
+        {/* Use onSubmit for the form */}
+        <form onSubmit={handleLogin} className={styles.form}>
+          <div className={styles.inputGroup}>
+            <label htmlFor="email">Email</label>
             <input
               onChange={handleChange}
-              type='email'
-              name='email'
-              placeholder='Enter your email...'
+              type="email"
+              name="email"
+              placeholder="Enter your email..."
               value={loginInfo.email}
             />
           </div>
-          <div>
-            <label htmlFor='password'>Password</label>
+          <div className={styles.inputGroup}>
+            <label htmlFor="password">Password</label>
             <input
               onChange={handleChange}
-              type='password'
-              name='password'
-              placeholder='Enter your password...'
+              type="password"
+              name="password"
+              placeholder="Enter your password..."
               value={loginInfo.password}
             />
           </div>
-          <Button label='Login' className={styles.signupButton} onClick={handleLogin} />
+          {/* Button type='submit' so form submission triggers handleLogin */}
+          <Button
+            type="submit"
+            label="Login"
+            className={styles.signupButton}
+          />
         </form>
         <span>
           Don't have an account? <Link to="/signup">Signup</Link>

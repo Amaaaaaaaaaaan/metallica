@@ -1,10 +1,9 @@
-// Test.jsx
 import React, { useState } from "react";
-import styles from "../styles/test.module.css"; // Adjust path as needed
-
-import MusicGenerator from "./Musicgen"; // Adjust path as needed
-import UnsavedPreviewBottomPlayer from "../components/UnsavedPreviewBottomPlayer"; // Adjust path as needed
-import SaveRecordingDialog from "../components/SaveRecordingDialog"; // Adjust path as needed
+import styles from "../styles/test.module.css"; // Updated CSS file
+import MusicGenerator from "./Musicgen";
+import UnsavedPreviewBottomPlayer from "../components/UnsavedPreviewBottomPlayer";
+import SaveRecordingDialog from "../components/SaveRecordingDialog";
+import Sidenav from "../components/sidenav";
 
 // Example list of music styles
 const musicStyles = ["Pop", "Rock", "Hip Hop", "R&B", "Electronic", "Jazz", "Reggae"];
@@ -70,71 +69,61 @@ function Test() {
   };
 
   return (
-    <div className={styles.gridContainer}>
-      <h1 className={styles.title}>Choose Your Style</h1>
+    <>
+      <Sidenav />
+      <div className={styles.gridContainer}>
+        <h1 className={styles.title}>Choose Your Style</h1>
 
-      <div
-        className={`${styles.bigBorder} ${activeCorner}`}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-      >
-        <div className={styles.grid}>
-          {musicStyles.map((style, index) => (
-            <div
-              key={index}
-              className={`${styles.item} ${selected.includes(style) ? styles.selected : ""}`}
-              onClick={() => toggleSelection(style)}
-            >
-              {style}
-            </div>
-          ))}
+        <div
+          className={`${styles.bigBorder} ${activeCorner}`}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div className={styles.grid}>
+            {musicStyles.map((style, index) => (
+              <div
+                key={index}
+                className={`${styles.item} ${
+                  selected.includes(style) ? styles.selected : ""
+                }`}
+                onClick={() => toggleSelection(style)}
+              >
+                {style}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className={styles.prompt}>
-        <strong>Your Prompt:</strong> {selected.join(", ") || "None"}
-      </div>
+        <div className={styles.prompt}>
+          <strong>Your Prompt:</strong> {selected.join(", ") || "None"}
+        </div>
 
-      {/*
-        MusicGenerator:
-        1) Takes the selected styles as input.
-        2) Generates audio.
-        3) Returns the generated audio URL via onAudioGenerated.
-      */}
-      <MusicGenerator 
-        selectedStyles={selected.join(", ")} 
-        onAudioGenerated={setUnsavedRecording} 
-      />
-
-      {/*
-        UnsavedPreviewBottomPlayer:
-        1) Uses the unsavedRecording URL to play the audio.
-        2) onSave opens the save dialog.
-        3) onDiscard clears the recording.
-      */}
-      {unsavedRecording && (
-        <UnsavedPreviewBottomPlayer
-          recordingUrl={unsavedRecording}
-          onSave={handleSave}
-          onDiscard={discardUnsaved}
-          onClose={() => console.log("Player closed")}
+        {/* Music Generator */}
+        <MusicGenerator
+          selectedStyles={selected.join(", ")}
+          onAudioGenerated={setUnsavedRecording}
         />
-      )}
 
-      {/*
-        SaveRecordingDialog:
-        1) Opens when showSaveDialog is true.
-        2) onSave confirms the save.
-        3) onCancel closes the dialog.
-      */}
-      {showSaveDialog && unsavedRecording && (
-        <SaveRecordingDialog 
-          recordingUrl={unsavedRecording} 
-          onSave={handleSaveUnsaved} 
-          onCancel={() => setShowSaveDialog(false)} 
-        />
-      )}
-    </div>
+        {/* Unsaved Preview Player */}
+        {unsavedRecording && (
+          <UnsavedPreviewBottomPlayer
+            recordingUrl={unsavedRecording}
+            onSave={handleSave}
+            onDiscard={discardUnsaved}
+            onClose={() => console.log("Player closed")}
+          />
+        )}
+
+        {/* Save Recording Dialog */}
+        {showSaveDialog && unsavedRecording && (
+          <SaveRecordingDialog
+            recordingUrl={unsavedRecording}
+            onSave={handleSaveUnsaved}
+            onCancel={() => setShowSaveDialog(false)}
+          />
+        )}
+      </div>
+    </>
   );
 }
 

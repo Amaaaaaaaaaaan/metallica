@@ -1,6 +1,17 @@
 import React, { Suspense, useState, useEffect, useRef } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
-import { Environment, OrbitControls, useGLTF, useAnimations, useProgress, Html } from "@react-three/drei";
+import "shepherd.js/dist/css/shepherd.css"; // Shepherd defaults first
+import "../App.css";
+import metallicaSvgWhite from "../../public/metallica-svg-white.svg";
+import metallicaSvgDefault from "../../public/metallica-svg.svg";
+import {
+  Environment,
+  OrbitControls,
+  useGLTF,
+  useAnimations,
+  useProgress,
+  Html
+} from "@react-three/drei";
 import * as THREE from "three";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -10,6 +21,10 @@ import BackgroundPicker from "./BackgroundPicker";
 import SaveRecordingDialog from "./SaveRecordingDialog";
 import UnsavedPreviewBottomPlayer from "./UnsavedPreviewBottomPlayer";
 import { useSettings } from "./SettingContext.jsx";
+
+// Replace driver.js with Shepherd.js
+import Shepherd from "shepherd.js";
+import "shepherd.js/dist/css/shepherd.css";
 
 // Loader Component for Suspense fallback
 function Loader() {
@@ -32,10 +47,37 @@ function Loader() {
 
   return (
     <Html center>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "white", fontSize: "16px", fontWeight: "bold", textAlign: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          color: "white",
+          fontSize: "16px",
+          fontWeight: "bold",
+          textAlign: "center"
+        }}
+      >
         <p>{message}</p>
-        <div style={{ width: "200px", height: "10px", background: "rgba(255,255,255,0.2)", borderRadius: "5px", position: "relative", overflow: "hidden", marginBottom: "10px" }}>
-          <div style={{ width: `${progress}%`, height: "100%", background: "white", transition: "width 0.3s" }}></div>
+        <div
+          style={{
+            width: "200px",
+            height: "10px",
+            background: "rgba(255,255,255,0.2)",
+            borderRadius: "5px",
+            position: "relative",
+            overflow: "hidden",
+            marginBottom: "10px"
+          }}
+        >
+          <div
+            style={{
+              width: `${progress}%`,
+              height: "100%",
+              background: "white",
+              transition: "width 0.3s"
+            }}
+          ></div>
         </div>
         <p>{Math.round(progress)}% Loaded</p>
       </div>
@@ -86,20 +128,19 @@ function DrumsModel({ isPlaying }) {
     }
   }, [isPlaying, actions, animations]);
 
-  // Log the current scale and rotation (x, y, z) each frame
   useFrame(() => {
     if (modelRef.current) {
-      const scaleValues = modelRef.current.scale.toArray();
-      const rotationValues = [
-        modelRef.current.rotation.x,
-        modelRef.current.rotation.y,
-        modelRef.current.rotation.z
-      ];
+      // Uncomment to log transformation values:
+      // const scaleValues = modelRef.current.scale.toArray();
+      // const rotationValues = [
+      //   modelRef.current.rotation.x,
+      //   modelRef.current.rotation.y,
+      //   modelRef.current.rotation.z
+      // ];
       // console.log("Scale:", scaleValues, "Rotation:", rotationValues);
     }
   });
 
-  // Fixed transformation values (use your provided numbers)
   const fixedPosition = [-0.2, -1.7, 0.3];
   const fixedRotation = [0, -0.1, 0];
 
@@ -144,11 +185,11 @@ function DrumComp() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [keyMapping, setKeyMapping] = useState("Default");
   const [keyMappings, setKeyMappings] = useState(PRESET_MAPPINGS["Default"]);
+  const [isKeyMappingOpen, setIsKeyMappingOpen] = useState(false);
 
   // Use shared settings from context
   const { volume, setVolume, bgImage, setBgImage, audioContext } = useSettings();
 
-  const [isKeyMappingOpen, setIsKeyMappingOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordings, setRecordings] = useState([]);
   const [unsavedRecording, setUnsavedRecording] = useState(null);
@@ -173,7 +214,6 @@ function DrumComp() {
   }, []);
 
   useEffect(() => {
-    // Only run when audioContext is defined
     if (!audioContext) return;
     if (audioContext.state === "suspended") {
       audioContext.resume();
@@ -259,7 +299,9 @@ function DrumComp() {
       setRecordingTime((prevTime) => {
         const newTime = prevTime + 1;
         if (toastIdRef.current) {
-          toast.update(toastIdRef.current, { render: `Recording started - Timer: ${newTime}s` });
+          toast.update(toastIdRef.current, {
+            render: `Recording started - Timer: ${newTime}s`
+          });
         }
         return newTime;
       });
@@ -291,13 +333,17 @@ function DrumComp() {
         clearInterval(timerIntervalRef.current);
         timerIntervalRef.current = null;
         if (toastIdRef.current) {
-          toast.update(toastIdRef.current, { render: `Recording paused - Timer: ${recordingTime}s` });
+          toast.update(toastIdRef.current, {
+            render: `Recording paused - Timer: ${recordingTime}s`
+          });
         }
       } else if (mediaRecorderRef.current.state === "paused") {
         mediaRecorderRef.current.resume();
         setIsPaused(false);
         if (toastIdRef.current) {
-          toast.update(toastIdRef.current, { render: `Recording resumed - Timer: ${recordingTime}s` });
+          toast.update(toastIdRef.current, {
+            render: `Recording resumed - Timer: ${recordingTime}s`
+          });
         }
         startTimer();
       }
@@ -352,13 +398,114 @@ function DrumComp() {
     }
   };
 
+  // Shepherd.js tour function with multiple steps using fixed data attributes
+  const startTour = () => {
+    const tour = new Shepherd.Tour({
+      defaultStepOptions: {
+        useModalOverlay: true,
+        modalOverlayOpeningPadding: 10,
+        cancelIcon: { enabled: true },
+        // Add your custom class here
+        classes: "snx-dark-green",
+        scrollTo: { behavior: "smooth", block: "center" }
+      }
+    });
+    
+    // Step 1: 3D drum model area
+    tour.addStep({
+      id: "canvas-step-1",
+      text: "This is the 3D drum model area. Interact with it using your mouse.",
+      attachTo: { element: '[data-tour="canvasContainer"]', on: "bottom" },
+      buttons: [{ text: "Next ->", action: tour.next }]
+    });
+
+    // Step 2: Additional info for the canvas area
+    tour.addStep({
+      id: "canvas-step-2",
+      text: "Rotate, zoom, and pan the view to explore the 3D model from different angles.",
+      attachTo: { element: '[data-tour="canvasContainer"]', on: "top" },
+      buttons: [
+        { text: "Previous", action: tour.back },
+        { text: "Next ->", action: tour.next }
+      ]
+    });
+
+    // Step 3: Preset Card for keyboard presets
+    tour.addStep({
+      id: "preset-step",
+      text: "Select different keyboard presets here to change the drum sound mapping.",
+      attachTo: { element: '[data-tour="presetCard"]', on: "bottom" },
+      buttons: [
+        { text: "Previous", action: tour.back },
+        { text: "Next ->", action: tour.next }
+      ]
+    });
+
+    // Step 4: Background Picker
+    tour.addStep({
+      id: "background-step",
+      text: "Change the scene background using this background picker.",
+      attachTo: { element: '[data-tour="backgroundCard"]', on: "bottom" },
+      buttons: [
+        { text: "<- Previous", action: tour.back },
+        { text: "Next ->", action: tour.next }
+      ]
+    });
+
+    // Step 5: Volume Controls
+    tour.addStep({
+      id: "volume-step",
+      text: "Adjust the volume of your drum sounds using these controls.",
+      attachTo: { element: '[data-tour="volumeControls"]', on: "top" },
+      buttons: [
+        { text: "<- Previous", action: tour.back },
+        { text: "Next ->", action: tour.next }
+      ]
+    });
+
+    // Step 6: Recording Controls
+    tour.addStep({
+      id: "recording-step",
+      text: "Use the recording controls to start, pause, and stop your recording.",
+      attachTo: { element: '[data-tour="recordingControls"]', on: "left" },
+      buttons: [
+        { text: "<- Previous", action: tour.back },
+        { text: "Next ->", action: tour.next }
+      ]
+    });
+
+    // Step 7: Key Mapping Configuration
+    tour.addStep({
+      id: "key-mapping-step",
+      text: "Configure key mappings for your drum sounds by clicking here.",
+      attachTo: { element: '[data-tour="keyMappingButton"]', on: "left" },
+      buttons: [
+        { text: "<- Previous", action: tour.back },
+        { text: "Finish", action: tour.complete }
+      ]
+    });
+
+    tour.start();
+  };
+
+  // Conditional SVG based on background color.
+  const svgSrc =
+    bgImage &&
+    bgImage.type === "color" &&
+    bgImage.value.toLowerCase() === "#000000"
+      ? metallicaSvgWhite
+      : metallicaSvgDefault;
+
   return (
     <div className={styles.container} onClick={handleUserGesture}>
-      {/* Fixed SVG overlay */}
+      {/* Fixed SVG overlay using the conditional svgSrc */}
       <div className={styles.svgOverlay}>
-        <img src="/metallica-svg.svg" alt="Overlay SVG" />
+        <img src={svgSrc} alt="Overlay SVG" />
       </div>
-      <div className={styles.canvasContainer}>
+      <div
+        className={styles.canvasContainer}
+        data-tour="canvasContainer" // Fixed attribute for Shepherd
+      >
         <Canvas
           className={styles.canvas}
           camera={{
@@ -375,7 +522,12 @@ function DrumComp() {
           <Suspense fallback={<Loader />}>
             <CanvasBackground bgImage={bgImage} />
             <ambientLight intensity={0.6} />
-            <hemisphereLight skyColor={"#aaaaaa"} groundColor={"#222222"} intensity={0.3} position={[0, 50, 0]} />
+            <hemisphereLight
+              skyColor={"#aaaaaa"}
+              groundColor={"#222222"}
+              intensity={0.3}
+              position={[0, 50, 0]}
+            />
             <directionalLight position={[5, 5, 5]} intensity={0.8} />
             <DrumsModel isPlaying={isAnimating} />
             <OrbitControls enableZoom={true} enablePan={true} />
@@ -383,11 +535,17 @@ function DrumComp() {
           </Suspense>
         </Canvas>
       </div>
-      <div className={styles.controls}>
+      <div
+        className={styles.controls}
+        data-tour="controls" // Fixed attribute for Shepherd
+      >
         <div className={styles.settingsContainer}>
-          <div className={styles.presetCard}>
+          <div
+            className={styles.presetCard}
+            data-tour="presetCard" // Fixed attribute for Shepherd
+          >
             <h4>Keyboard Preset</h4>
-            <label>Presets:</label>
+            <label style={{ color: "white" }}>Presets:</label>
             <select onChange={handlePresetChange} value={keyMapping}>
               {Object.keys(PRESET_MAPPINGS).map((preset) => (
                 <option key={preset} value={preset}>
@@ -396,28 +554,45 @@ function DrumComp() {
               ))}
             </select>
           </div>
-          <div className={styles.backgroundCard}>
-            <h4>Background</h4>
-            {/* BackgroundPicker will update the shared bgImage */}
+          <div
+            className={styles.backgroundCard}
+            data-tour="backgroundCard" // Fixed attribute for Shepherd
+          >
             <BackgroundPicker setBg={setBgImage} />
           </div>
         </div>
-        <button className={styles.keyMappingButton} onClick={() => setIsKeyMappingOpen(true)}>
+        {/* Tour Button */}
+        <button onClick={startTour} className={styles.tourButton}>
+          Start Tour
+        </button>
+        {/* Key Mapping Button */}
+        <button
+          className={styles.keyMappingButton}
+          onClick={() => setIsKeyMappingOpen(true)}
+          data-tour="keyMappingButton" // Fixed attribute for Shepherd
+        >
           🎹 Configure Keys
         </button>
-        <div className={`${styles.popupKeyMapping} ${isKeyMappingOpen ? styles.show : ""}`}>
-          <button className={styles.closeButton} onClick={() => setIsKeyMappingOpen(false)}>
-            ✖
-          </button>
-          <h3>Key Mapping</h3>
-          <KeyMapping soundMap={keyMappings} updateSoundMap={setKeyMappings} />
-        </div>
-        <div className={styles.volumeControls}>
-          <label>Volume: {Math.round(volume * 100)}%</label>
+        {/* Conditional KeyMapping Popup */}
+        {isKeyMappingOpen && (
+          <div className={`${styles.popupKeyMapping} ${isKeyMappingOpen ? styles.show : ""}`}>
+            <button
+              className={styles.closeButton}
+              onClick={() => setIsKeyMappingOpen(false)}
+            >
+              ✖
+            </button>
+            <h3>Key Mapping</h3>
+            <KeyMapping soundMap={keyMappings} updateSoundMap={setKeyMappings} />
+          </div>
+        )}
+        <div className={`${styles.volumeControls}`} data-tour="volumeControls">
+        <label style={{ color: "white" }}>Volume: {Math.round(volume * 100)}%</label>
+
           <button onClick={() => adjustVolume(-0.1)}>🔉 Decrease</button>
           <button onClick={() => adjustVolume(0.1)}>🔊 Increase</button>
         </div>
-        <div className={styles.recordingControls}>
+        <div className={`${styles.recordingControls}`} data-tour="recordingControls">
           {isRecording ? (
             <button
               onClick={pauseRecording}
@@ -448,7 +623,11 @@ function DrumComp() {
         />
       )}
       {showSaveDialog && unsavedRecording && (
-        <SaveRecordingDialog recordingUrl={unsavedRecording} onSave={handleSaveUnsaved} onCancel={() => setShowSaveDialog(false)} />
+        <SaveRecordingDialog
+          recordingUrl={unsavedRecording}
+          onSave={handleSaveUnsaved}
+          onCancel={() => setShowSaveDialog(false)}
+        />
       )}
       <ToastContainer />
     </div>

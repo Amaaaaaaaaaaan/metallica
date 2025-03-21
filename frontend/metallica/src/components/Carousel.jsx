@@ -58,7 +58,8 @@ const Carousel = () => {
   };
 
   return (
-    <div
+<div className='body'>    <div
+     
       id="image-track"
       ref={trackRef}
       data-mouse-down-at="0"
@@ -72,47 +73,49 @@ const Carousel = () => {
     >
       <img
         className="image"
-        src="https://c0.wallpaperflare.com/preview/665/327/582/brown-and-black-electric-guitar.jpg"
+        src="../src/assets/drumbg2.png"
         draggable="false"
         alt="Drums"
         onClick={() => handleClick('/drums')}
       />
       <img
         className="image"
-        src="https://c0.wallpaperflare.com/preview/218/233/171/piano-oldschool-vintage-music.jpg"
+        src="../src/assets/piano.jpeg"
         draggable="false"
         alt="Piano"
         onClick={() => handleClick('/piano')}
       />
       <img
         className="image"
-        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwpmUYLno82MT7C1Szd_fATyfN4jiaQmLcSw&s"
+        src="../src/assets/sequencer.jpg"
         draggable="false"
         alt="Sequencer"
-        onClick={() => handleClick('/sequencer')}
+        onClick={() => handleClick('/beatsequencer')}
       />
       <img
         className="image"
-        src="https://c0.wallpaperflare.com/preview/665/327/582/brown-and-black-electric-guitar.jpg"
+        src="https://dl-asset.cyberlink.com/web/prog/learning-center/html/31482/PDR19-YouTube-909_PDR_AI%20Music%20Generators_PC/img/hdr-img-ai-music-gen-jpg.jpg "
         draggable="false"
         alt="Test"
         onClick={() => handleClick('/test')}
       />
       <img
         className="image"
-        src="https://c0.wallpaperflare.com/preview/218/233/171/piano-oldschool-vintage-music.jpg"
+        src="https://images-cdn.ubuy.co.in/66b867f7425e1954791e2685-virtual-air-drum-set-electric-drumsticks.jpg  "
         draggable="false"
         alt="Virtual Drums"
         onClick={() => handleClick('/virtualdrums')}
       />
       <img
         className="image"
-        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwpmUYLno82MT7C1Szd_fATyfN4jiaQmLcSw&s"
+        src="../src/assets/savedmusic.png"
         draggable="false"
         alt="Test"
         onClick={() => handleClick('/saved')}
       />
     </div>
+    </div>
+
   );
 };
 

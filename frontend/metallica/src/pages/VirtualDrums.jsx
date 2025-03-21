@@ -4,6 +4,16 @@ import { Camera } from '@mediapipe/camera_utils';
 import { Howl } from 'howler';
 import style from '../styles/HandDrum.module.css';
 
+// Import images for each drum zone
+import bassDrumImg from '../assets/virtualdrum/Bass_drum.png';
+import leftHatImg from '../assets/virtualdrum/left_hat.png';
+import leftDrumImg from '../assets/virtualdrum/left_drum.png';
+import rightDrumImg from '../assets/virtualdrum/right_drum.png';
+import hatBassImg from '../assets/virtualdrum/hat_bass.png';
+import leftBottomImg from '../assets/virtualdrum/left_bottom.png';
+import rightBottomImg from '../assets/virtualdrum/right_bottom.png';
+import rightCymbalImg from '../assets/virtualdrum/right_cymbal.png';
+
 // Use your provided audio paths and static drum names.
 const PRESET_MAPPINGS = {
   Default: {
@@ -18,77 +28,84 @@ const PRESET_MAPPINGS = {
   }
 };
 
-// Define drum zones as percentages relative to a 640x480 canvas.
-// These positions are defined for a mirrored view.
-// For example, a zone defined with x: 0.08 in a mirrored view will actually be on the left side.
+// Define drum zones with an additional "image" property.
+// Positions are defined in relative percentages.
 const drumZones = [
   {
-    name: 'BassDrum',
-    x: 0.08,
-    y: 0.65,
-    width: 0.18,
-    height: 0.25,
-    sound: PRESET_MAPPINGS.Default.BassDrum
-  },
-  {
     name: 'LeftHat',
-    x: 0.28,
-    y: 0.65,
-    width: 0.18,
-    height: 0.25,
-    sound: PRESET_MAPPINGS.Default.LeftHat
-  },
-  {
-    name: 'LeftDrum',
-    x: 0.48,
-    y: 0.65,
-    width: 0.18,
-    height: 0.25,
-    sound: PRESET_MAPPINGS.Default.LeftDrum
-  },
-  {
-    name: 'RightDrum',
-    x: 0.68,
-    y: 0.65,
-    width: 0.18,
-    height: 0.25,
-    sound: PRESET_MAPPINGS.Default.RightDrum
+    x: 0.05,  // top-left
+    y: 0.05,
+    width: 0.2,
+    height: 0.2,
+    sound: PRESET_MAPPINGS.Default.LeftHat,
+    image: leftHatImg
   },
   {
     name: 'HatBass',
-    x: 0.08,
-    y: 0.35,
-    width: 0.18,
-    height: 0.25,
-    sound: PRESET_MAPPINGS.Default.HatBass
-  },
-  {
-    name: 'LeftBottom',
-    x: 0.28,
-    y: 0.35,
-    width: 0.18,
-    height: 0.25,
-    sound: PRESET_MAPPINGS.Default.LeftBottom
-  },
-  {
-    name: 'RightBottom',
-    x: 0.48,
-    y: 0.35,
-    width: 0.18,
-    height: 0.25,
-    sound: PRESET_MAPPINGS.Default.RightBottom
+    x: 0.40,  // top-center
+    y: 0.05,
+    width: 0.2,
+    height: 0.2,
+    sound: PRESET_MAPPINGS.Default.HatBass,
+    image: hatBassImg
   },
   {
     name: 'RightCymbal',
-    x: 0.68,
-    y: 0.35,
-    width: 0.18,
-    height: 0.25,
-    sound: PRESET_MAPPINGS.Default.RightCymbal
+    x: 0.75,  // top-right
+    y: 0.05,
+    width: 0.2,
+    height: 0.2,
+    sound: PRESET_MAPPINGS.Default.RightCymbal,
+    image: rightCymbalImg
+  },
+  {
+    name: 'LeftDrum',
+    x: 0.04,  // middle-left
+    y: 0.33,
+    width: 0.2,
+    height: 0.3,
+    sound: PRESET_MAPPINGS.Default.LeftDrum,
+    image: leftDrumImg
+  },
+  {
+    name: 'RightDrum',
+    x: 0.75,  // middle-right
+    y: 0.30,
+    width: 0.2,
+    height: 0.3,
+    sound: PRESET_MAPPINGS.Default.RightDrum,
+    image: rightDrumImg
+  },
+  {
+    name: 'LeftBottom',
+    x: 0.05,  // bottom-left
+    y: 0.60,
+    width: 0.2,
+    height: 0.4,
+    sound: PRESET_MAPPINGS.Default.LeftBottom,
+    image: leftBottomImg
+  },
+  {
+    name: 'BassDrum',
+    x: 0.40,  // bottom-center
+    y: 0.55,
+    width: 0.2,
+    height: 0.4,
+    sound: PRESET_MAPPINGS.Default.BassDrum,
+    image: bassDrumImg
+  },
+  {
+    name: 'RightBottom',
+    x: 0.75,  // bottom-right
+    y: 0.60,
+    width: 0.2,
+    height: 0.4,
+    sound: PRESET_MAPPINGS.Default.RightBottom,
+    image: rightBottomImg
   }
 ];
 
-// Debounce storage so the same zone isn’t retriggered too frequently.
+// Debounce storage to avoid retriggering the same sound too frequently.
 const lastPlayTime = {};
 
 const HandDrum = () => {
@@ -98,6 +115,20 @@ const HandDrum = () => {
     width: window.innerWidth,
     height: window.innerHeight
   });
+  // Cache for preloaded images.
+  const imagesCacheRef = useRef({});
+
+  // Toggle state to show or hide hand tracking debug markers.
+  const [showHandTracking, setShowHandTracking] = useState(false);
+
+  // Preload images on mount.
+  useEffect(() => {
+    drumZones.forEach(zone => {
+      const img = new Image();
+      img.src = zone.image;
+      imagesCacheRef.current[zone.name] = img;
+    });
+  }, []);
 
   // Update canvas size on window resize.
   useEffect(() => {
@@ -111,7 +142,7 @@ const HandDrum = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Function to play drum sound for a given zone (debounced).
+  // Function to play drum sound (debounced).
   const playDrumSound = (zone) => {
     const now = Date.now();
     if (lastPlayTime[zone.name] && now - lastPlayTime[zone.name] < 300) return;
@@ -129,56 +160,41 @@ const HandDrum = () => {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Mirror the video image: set up transformation.
+    // Mirror the video feed.
     ctx.save();
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
     ctx.restore();
 
-    // Draw drum zones (flip their X coordinate for mirror view).
+    // Draw each drum image at its designated zone.
     drumZones.forEach(zone => {
-      // For mirrored view, compute mirrored x:
-      // mirrored_x = canvas.width - (zone.x*canvas.width) - (zone.width*canvas.width)
       const x = canvas.width - (zone.x * canvas.width) - (zone.width * canvas.width);
       const y = zone.y * canvas.height;
       const w = zone.width * canvas.width;
       const h = zone.height * canvas.height;
-      ctx.beginPath();
-      ctx.rect(x, y, w, h);
-      ctx.strokeStyle = 'lime';
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      ctx.fillStyle = 'rgba(0,255,0,0.1)';
-      ctx.fill();
-      ctx.font = '24px Arial';
-      ctx.fillStyle = 'white';
-      ctx.fillText(zone.name, x + 10, y + 30);
+      const zoneImg = imagesCacheRef.current[zone.name];
+      if (zoneImg && zoneImg.complete) {
+        ctx.drawImage(zoneImg, x, y, w, h);
+      }
     });
 
     // Process detected hand landmarks.
     if (results.multiHandLandmarks) {
       results.multiHandLandmarks.forEach((landmarks) => {
-        // Draw landmarks for debugging: mirror the x coordinate.
-        landmarks.forEach(pt => {
-          const x = canvas.width - (pt.x * canvas.width);
-          const y = pt.y * canvas.height;
-          ctx.beginPath();
-          ctx.arc(x, y, 5, 0, 2 * Math.PI);
-          ctx.fillStyle = 'red';
-          ctx.fill();
-        });
-        // Use the index finger tip (landmark 8).
+        // Draw the index finger tip for collision detection.
         const indexTip = landmarks[8];
         if (indexTip) {
           const x = canvas.width - (indexTip.x * canvas.width);
           const y = indexTip.y * canvas.height;
-          ctx.beginPath();
-          ctx.arc(x, y, 10, 0, 2 * Math.PI);
-          ctx.fillStyle = 'blue';
-          ctx.fill();
-
-          // Check collision: iterate over drum zones.
+          // If hand tracking toggle is enabled, draw a blue circle at the index tip.
+          if (showHandTracking) {
+            ctx.beginPath();
+            ctx.arc(x, y, 10, 0, 2 * Math.PI);
+            ctx.fillStyle = 'blue';
+            ctx.fill();
+          }
+          // Check collision with each drum zone.
           drumZones.forEach(zone => {
             const zoneX = canvas.width - (zone.x * canvas.width) - (zone.width * canvas.width);
             const zoneY = zone.y * canvas.height;
@@ -189,10 +205,22 @@ const HandDrum = () => {
             }
           });
         }
+        // If toggle is enabled, optionally draw all hand landmarks.
+        if (showHandTracking) {
+          landmarks.forEach(pt => {
+            const x = canvas.width - (pt.x * canvas.width);
+            const y = pt.y * canvas.height;
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = 'red';
+            ctx.fill();
+          });
+        }
       });
     }
   };
 
+  // Set up Mediapipe Hands and camera.
   useEffect(() => {
     const hands = new Hands({
       locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
@@ -204,7 +232,6 @@ const HandDrum = () => {
       minTrackingConfidence: 0.5,
     });
     hands.onResults(onResults);
-
     const camera = new Camera(videoRef.current, {
       onFrame: async () => {
         await hands.send({ image: videoRef.current });
@@ -213,13 +240,12 @@ const HandDrum = () => {
       height: canvasSize.height,
     });
     camera.start();
-
     return () => {
       camera.stop();
     };
-  }, [canvasSize]);
+  }, [canvasSize, showHandTracking]);
 
-  // Resume AudioContext on user gesture (click)
+  // Resume AudioContext on user gesture.
   const handleUserGesture = () => {
     if (window.AudioContext) {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -231,22 +257,34 @@ const HandDrum = () => {
 
   return (
     <div className={style["hand-drum-container"]} onClick={handleUserGesture}>
-      <video 
-        ref={videoRef} 
-        className={style["hand-drum-video"]} 
-        autoPlay 
-        muted 
-        playsInline 
-        style={{ display: 'none' }} 
+      {/* Toggle button for showing/hiding hand tracking markers */}
+      <button
+        className={style.handTrackingToggle}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowHandTracking(prev => !prev);
+        }}
+      >
+        {showHandTracking ? 'Hide Hand Tracking' : 'Show Hand Tracking'}
+      </button>
+      {/* Hidden video feed for Mediapipe */}
+      <video
+        ref={videoRef}
+        className={style["hand-drum-video"]}
+        autoPlay
+        muted
+        playsInline
+        style={{ display: 'none' }}
       />
-      <canvas 
-        ref={canvasRef} 
-        width={canvasSize.width} 
-        height={canvasSize.height} 
-        className={style["hand-drum-canvas"]} 
+      {/* Main canvas for drawing camera feed and drum images */}
+      <canvas
+        ref={canvasRef}
+        width={canvasSize.width}
+        height={canvasSize.height}
+        className={style["hand-drum-canvas"]}
       />
       <div className={style["drum-instructions"]}>
-        <p>Wave your hand over the drum zones to play the drums!</p>
+        <p>Wave your hand over the drum images to play the drums!</p>
       </div>
     </div>
   );

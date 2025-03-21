@@ -142,9 +142,9 @@ const UnsavedPreviewBottomPlayer = ({ recordingUrl, onSave, onDiscard, onClose }
       <div className={styles.centerSection}>
         <div className={styles.controlButtons}>
           <button className={styles.iconButton}>⏮</button>
-          <button onClick={togglePlay} className={styles.playPauseButton}>
+          <div onClick={togglePlay} className={styles.playPauseButton}>
             {isPlaying ? "⏸" : "▶"}
-          </button>
+          </div>
           <button className={styles.iconButton}>⏭</button>
         </div>
         <div className={styles.progressRow}>

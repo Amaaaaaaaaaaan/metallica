@@ -1,7 +1,7 @@
 /* Container that holds everything */
-
 body{
   background-color: black;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 .gridContainer {
   position: relative;
@@ -9,7 +9,7 @@ body{
   flex-direction: column;
   align-items: center;
   padding: 1.5rem;
-  min-height: 100vh;
+  min-height: 90vh;
   background-color: black;
   color: white;
 }
@@ -44,25 +44,25 @@ body{
   transition: border-color 0.2s;
 }
 
-/* Corner highlight classes */
+/* Corner highlight classes using a dark teal combination */
 .topLeft::before {
-  border-top-color: #ff4d94; /* Pinkish highlight */
-  border-left-color: #ff4d94;
+  border-top-color: #285584f2;
+  border-left-color: #285584f2;
 }
 
 .topRight::before {
-  border-top-color: #ff4d94;
-  border-right-color: #ff4d94;
+  border-top-color: #285584f2;
+  border-right-color: #285584f2;
 }
 
 .bottomLeft::before {
-  border-bottom-color: #ff4d94;
-  border-left-color: #ff4d94;
+  border-bottom-color: #285584f2;
+  border-left-color: #285584f2;
 }
 
 .bottomRight::before {
-  border-bottom-color: #ff4d94;
-  border-right-color: #ff4d94;
+  border-bottom-color: #285584f2;
+  border-right-color: #285584f2;
 }
 
 /* Grid for the selectable items */
@@ -85,12 +85,12 @@ body{
 }
 
 .item:hover {
-  border-color: #ff4d94; /* Pinkish highlight on hover */
+  border-color: #285584f2;
 }
 
 /* Selected item style */
 .selected {
-  background-color: #ff4d94;
+  background-color: #285584f2;
   color: white;
 }
 

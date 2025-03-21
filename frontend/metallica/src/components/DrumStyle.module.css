@@ -1,301 +1,166 @@
 /* --- Global Reset --- */
-html, body {
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  height: 100%; /* Ensures body stretches full height */
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: 'Poppins', sans-serif;
+  background-color: #0d0d0d;
+  color: var(--text-color);
 }
 
 /* --- Root Variables --- */
 :root {
-  --bg-dark:#000 ;     /* Dark background for the container */
-  --bg-panel: #171717;    /* Slightly lighter for panels */
-  --bg-box: #302F2F;      /* Inner box background */
-  --text-color: #eeeeee;
-  --accent: #ff6f61;
+  --bg-dark: #0d0d0d;       /* Main dark background */
+  --bg-panel: #1a1a1a;      /* Controls panel background */
+  --bg-box: #262626;        /* Inner card background */
+  --text-color: #e0e0e0;
+  --accent: #285584f2;
   --border-radius: 10px;
-  --canvas-radius: 20px;
-  --shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   --transition: 0.3s ease;
   --small-text: 0.85rem;
   --normal-text: 1rem;
 }
 
-/* --- Generic Button Style --- */
+/* --- Buttons --- */
 button {
   background-color: var(--accent);
+  border: none;
   border-radius: 30px;
-  outline: none;
-  margin: 0;
-  padding: 12px 25px;
-  font-family: "Poppins", sans-serif;
-  font-size: 30px;
+  padding: 20px 29px;
+  font-size: 1.125rem;
   font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -1px;
-  position: relative;
-  text-align: center;
-  display: flex;
-  align-items: center;
   cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+
+button:hover {
+  transform: scale(1.05);
 }
 
 /* --- Main Container --- */
 .container {
   display: flex;
-  flex-direction: row;
-  width: 100vw;     /* Fill entire viewport width */
-  height: 100vh;    /* Fill entire viewport height */
-  background-color: var(--bg-dark);
-  color: var(--text-color);
-  margin: 0;
-  padding: 0;
-  gap: 0;
-  box-sizing: border-box;
-  max-height: 100vh;
-  overflow-y: auto; 
+  width: 100vw;
+  height: 100vh;
+  background-color: #0d0d0d;
+  overflow: hidden;
+
 }
 
 /* --- Canvas Container --- */
 .canvasContainer {
   flex: 5;
-  display: flex;
-  align-items: stretch;
-  justify-content: stretch;
   background-color: #000;
-  box-shadow: var(--shadow);
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 2px solid var(--bg-panel);
 }
 
-/* --- The Canvas --- */
+/* --- Canvas --- */
 .canvas {
   width: 100%;
   height: 100%;
   display: block;
-  /* border-radius: var(--canvas-radius); */
 }
 
 /* --- Controls Panel --- */
 .controls {
   flex: 3;
   background-color: var(--bg-panel);
-  box-shadow: var(--shadow);
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 20px;
-}
-
-/* --- Recording Buttons --- */
-.triangleButton {
-  width: 50px;
-  height: 50px;
-  background-color: #28a745; /* Green */
-  clip-path: polygon(25% 10%, 25% 90%, 75% 50%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s ease-in-out;
-}
-
-.redCircleButton {
-  width: 0px;
-  height: 45px;
-  background-color: #dc3545; /* Red */
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s ease-in-out;
-}
-
-.pauseButton {
-  width: 50px;
-  height: 40px;
-  background-color: #1a95e6;
-  border: none;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.pauseButton:hover {
-  background-color: #1a95e6;
-  transform: scale(1.1);
-}
-
-.pauseButton::before {
-  content: "⏸️";
-  font-size: 24px;
-  color: white;
-}
-
-.triangleButton, .redCircleButton, .pauseButton {
-  display: inline-flex;
-  position: relative;
-  align-items: center;
-  text-align: start;
-  gap: 10px;
-}
-.svgOverlay {
-  position: absolute;
-  top: 40px; /* adjust as needed */
-  left: 33%;
-  transform: translateX(-50%);
-  z-index: 10;
-  pointer-events: none;
-}
-
-.svgOverlay img {
-  width: 350px; /* adjust size as needed */
-  height: auto;
-}
-.textOverlay {
-  position: absolute;
-  top: 40px;
-  left: 33%;
-  transform: translateX(-50%);
-  color: white;
-  font-size: 24px;
-  z-index: 10;
-  pointer-events: none;
-}
-
-.triangleButton:hover {
-  transform: scale(1.1);
-  background-color: #218838;
-}
-
-.redCircleButton:hover {
-  transform: scale(1.1);
-  background-color: #c82333;
-}
-
-/* --- Discard Button (for recordings) --- */
-.discardButton {
-  margin-left: 10px;
-  background-color: transparent;
-  border: none;
-  color: #d00;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-/* --- Scrollable Recordings Container --- */
-.recordingsScrollable {
-  max-height: 200px;
   overflow-y: auto;
-  margin-top: 1rem;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: var(--bg-box);
 }
 
-/* Custom scrollbar for WebKit browsers */
-.recordingsScrollable::-webkit-scrollbar {
-  width: 8px;
-}
-
-.recordingsScrollable::-webkit-scrollbar-track {
-  border-radius: 8px;
-  background: #2c2c2c;
-}
-
-.recordingsScrollable::-webkit-scrollbar-thumb {
-  background: #bbb;
-  border-radius: 8px;
-}
-
-.recordingsScrollable::-webkit-scrollbar-thumb:hover {
-  background: #999;
-}
-
-/* Firefox scrollbar styling */
-.recordingsScrollable {
-  scrollbar-width: thin;
-  scrollbar-color: #bbb #2c2c2c;
-}
-
-/* Each recording row */
-.recordingItem {
-  display: flex;
-  align-items: center;
-  margin-top: 10px;
-}
-
-/* Style the <audio> element to ensure it's visible */
-.recordingItem audio {
-  flex: 1;
-  width: 100%;
-  margin-right: 10px;
-  display: flex;
-}
-
-
-
-/* Empty State for recordings */
-.emptyMessage {
-  text-align: center;
-  color: #f4f1f1;
-  padding: 20px 0;
-  font-style: italic;
-}
-
-/* --- Panels: Preset, Volume, Key Mapping, etc. --- */
-.presetSelector,
-.volumeControls,
-.keyMappingContainer {
+/* --- Shared Card Styling (for Preset & Background Cards) --- */
+.card {
   background-color: var(--bg-box);
   border-radius: var(--border-radius);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  padding: 19px;
-}
-
-/* Preset Selector */
-.presetSelector label {
-  display: block;
-  font-size: var(--normal-text);
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.presetSelector select {
-  width: 100%;
-  padding: 8px;
-  border-radius: var(--border-radius);
-  border: none;
-  font-size: var(--normal-text);
-  outline: none;
-  transition: transform var(--transition);
-  background-color: #2a2a2a;
+  padding: 15px;
+  box-shadow: var(--shadow);
   color: var(--text-color);
 }
 
-.presetSelector select:hover {
-  transform: scale(1.02);
+.card h4 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--bg-panel);
+  padding-bottom: 5px;
 }
 
-/* Volume Controls */
+.card label {
+  display: block;
+  font-size: var(--normal-text);
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+/* --- Preset Card Specific --- */
+.presetCard {
+  width: 270px;
+  background-color: #2b2e32;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.6);
+}
+
+.presetCard select {
+  width: 100%;
+  padding: 8px;
+  border-radius: var(--border-radius);
+  border: 1px solid #444;
+  background-color: #2a2a2a;
+  color: var(--text-color);
+  margin-top: 5px;
+  transition: background-color var(--transition);
+}
+
+.presetCard select:hover {
+  background-color: #3a3a3a;
+}
+
+/* --- Background Card (if used) --- */
+.backgroundCard {
+  width: 270px;
+  /* You can add extra properties if needed */
+}
+
+/* --- Settings Container for Cards --- */
+.settingsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* --- Volume Controls --- */
+.volumeControls {
+  background-color: var(--bg-box);
+  border-radius: var(--border-radius);
+  padding: 15px;
+  box-shadow: var(--shadow);
+}
+
 .volumeControls label {
   font-size: var(--normal-text);
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
 }
 
 .volumeControls button {
   width: 100%;
   padding: 10px;
-  margin-top: 5px;
+  margin-top: 8px;
   border-radius: var(--border-radius);
-  border: none;
   background-color: var(--accent);
   color: #fff;
   font-size: var(--normal-text);
@@ -308,66 +173,42 @@ button {
   transform: scale(1.02);
 }
 
-.volumeControls button:active {
-  transform: scale(0.98);
-}
-
-/* Key Mapping Container */
+/* --- Key Mapping Container --- */
 .keyMappingContainer {
-  font-size: var(--small-text);
-}
-
-.keyMappingContainer h3 {
-  margin-bottom: 10px;
-}
-
-.keyMappingContainer label {
-  font-size: var(--small-text);
-  margin-bottom: 3px;
-  display: inline-block;
-}
-
-.keyMappingContainer select {
-  width: 80px;
-  padding: 5px;
-  border-radius: var(--border-radius);
-  border: 1px solid #444;
-  font-size: var(--small-text);
-  margin-left: 5px;
-  background-color: #2a2a2a;
-  color: var(--text-color);
-}
-
-/* --- Side Popup Key Mapping --- */
-.popupKeyMapping {
-  position: fixed;
-  right: -300px; /* Initially off-screen */
-  top: 50%;
-  transform: translateY(-50%);
-  width: 250px;
   background-color: var(--bg-box);
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
   padding: 15px;
+  box-shadow: var(--shadow);
+}
+
+/* --- Popup Key Mapping --- */
+.popupKeyMapping {
+  position: fixed;
+  right: -350px; /* Initially hidden off-screen */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 350px;
+  max-width: 90%; /* Ensure it doesn't exceed viewport on small screens */
+  background-color: var(--bg-box);
+  border-radius: var(--border-radius);
+  padding: 15px;
+  box-shadow: var(--shadow);
   transition: right var(--transition);
   z-index: 1000;
 }
 
 .popupKeyMapping.show {
-  right: 0px; /* Slide in when active */
+  right: 20px; /* Adjust this value to provide a small margin from the edge */
 }
 
 .popupKeyMapping h3 {
   margin-bottom: 10px;
-  color: var(--text-color);
-  font-size: var(--normal-text);
+  text-align: center;
 }
 
 .popupKeyMapping label {
-  font-size: var(--small-text);
-  margin-bottom: 5px;
   display: block;
-  color: var(--text-color);
+  margin-bottom: 5px;
 }
 
 .popupKeyMapping select {
@@ -381,101 +222,154 @@ button {
   outline: none;
 }
 
-/* Close Button */
+/* --- Popup Close Button --- */
 .popupKeyMapping .closeButton {
   position: absolute;
   top: 10px;
-  right: -10px;
+  right: 10px;
   background: none;
-  color: white;
   border: none;
-  height: 24px;
-  font-size: 16px;
+  font-size: 18px;
+  color: var(--text-color);
   cursor: pointer;
-  transition: background var(--transition), font-size var(--transition);
+  transition: font-size var(--transition);
+  align-content: center;
 }
 
 .popupKeyMapping .closeButton:hover {
-  font-size: 18px;
+  font-size: 20px;
 }
 
-/* Container for both the preset and background “cards” side by side */
-.settingsContainer {
-  display: flex;
-  flex-direction: row;
-  gap: 40px;
+/* --- Metronome Controls --- */
+.metronomeControls {
+  background-color: var(--bg-box);
+  border-radius: var(--border-radius);
+  padding: 15px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.metronomeControls input[type="range"] {
+  width: 100%;
   margin: 10px 0;
-  justify-content: flex-start;
+  cursor: pointer;
 }
 
-/* Card-like styling for the preset selector */
-.presetCard {
-  background-color: #2b2b2b;
-  border: 1px solid #444;
-  border-radius: 4px;
-  padding: 10px;
-  width: 260px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-}
-
-/* Card-like styling for the background picker */
-.backgroundCard {
-  background-color: #2c2828;
-  border: 1px solid #444;
-  border-radius: 4px;
-  padding: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-}
-
-/* Optional heading styling for cards */
-.presetCard h4,
-.backgroundCard h4 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 1.1rem;
-  color: #fff;
-}
-
-/* Scrollbar styling for the main container */
-.container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.container::-webkit-scrollbar-track {
-  background: #2b2b2b;
-}
-
-.container::-webkit-scrollbar-thumb {
-  background-color: #666;
-  border-radius: 4px;
-  border: 1px solid #444;
-}
+/* --- Recording Controls --- */
 .recordingControls {
   display: flex;
   align-items: center;
-  gap: 15px; /* adjust spacing */
-  /* existing styles... */
+  gap: 15px;
 }
 
-.unsavedPreviewInline {
+/* --- Triangle Button (Start Recording) --- */
+.triangleButton {
+  width: 50px;
+  height: 50px;
+  background-color: #28a745;
+  clip-path: polygon(25% 10%, 25% 90%, 75% 50%);
+  border: none;
+  cursor: pointer;
+  transition: transform var(--transition), background-color var(--transition);
+}
+
+.triangleButton:hover {
+  transform: scale(1.1);
+  background-color: #218838;
+}
+
+/* --- Red Circle Button (Stop Recording) --- */
+.redCircleButton {
+  width: 50px;
+  height: 50px;
+  background-color: #dc3545;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: transform var(--transition), background-color var(--transition);
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
 }
 
-.inlineAudio {
-  width: 250px; /* or whatever fits well */
+.redCircleButton:hover {
+  transform: scale(1.1);
+  background-color: #c82333;
+}
+
+/* --- Pause Button --- */
+.pauseButton {
+  width: 50px;
+  height: 50px;
+  background-color: #1a95e6;
+  border: none;
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform var(--transition), background-color var(--transition);
+}
+
+.pauseButton:hover {
+  transform: scale(1.1);
+}
+
+.pauseButton::before {
+  content: "⏸️";
+  font-size: 24px;
+  color: #fff;
+}
+
+/* --- SVG Overlay --- */
+.svgOverlay {
+  position: absolute;
+  top: 50px; /* Slight margin from the top */
+  left: 35%;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.svgOverlay img {
+  width: 350px;
+  height: auto;
+}
+
+/* --- Recordings List --- */
+.recordingsScrollable {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #444;
+  border-radius: var(--border-radius);
+  background-color: var(--bg-box);
+}
+
+.recordingItem {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.recordingItem audio {
+  flex: 1;
+}
+
+/* --- Save & Discard Buttons for Recordings --- */
+.saveButton, .discardButton {
+  padding: 8px 14px;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: var(--small-text);
+  cursor: pointer;
+  transition: background var(--transition);
 }
 
 .saveButton {
   background-color: #1db954;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 14px;
   color: #fff;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.2s;
 }
 
 .saveButton:hover {
@@ -484,15 +378,29 @@ button {
 
 .discardButton {
   background-color: #dc3545;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 14px;
   color: #fff;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.2s;
 }
 
 .discardButton:hover {
   background-color: #c82333;
+}
+
+/* --- Scrollbar Styling --- */
+.container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.container::-webkit-scrollbar-track {
+  background: var(--bg-panel);
+}
+
+.container::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 4px;
+  border: 1px solid #444;
+}
+
+.container {
+  scrollbar-width: thin;
+  scrollbar-color: #666 var(--bg-panel);
 }

@@ -1,5 +1,5 @@
 import React, { Suspense, useState, useEffect, useRef } from "react";
-import { Canvas,useThree } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { Environment, OrbitControls, useGLTF, useAnimations, useProgress, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { toast, ToastContainer } from "react-toastify";
@@ -9,6 +9,11 @@ import KeyMapping from "./KeyMapping";
 import BackgroundPicker from "./BackgroundPicker";
 import SaveRecordingDialog from "./SaveRecordingDialog";
 import UnsavedPreviewBottomPlayer from "./UnsavedPreviewBottomPlayer";
+import metallicaSvgWhite from "../../public/metallica-svg-white.svg";
+import metallicaSvgDefault from "../../public/metallica-svg.svg";
+// Shepherd.js imports
+import Shepherd from "shepherd.js";
+import "shepherd.js/dist/css/shepherd.css";
 
 // Loader Component for Suspense fallback
 function Loader() {
@@ -31,10 +36,31 @@ function Loader() {
 
   return (
     <Html center>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "white", fontSize: "16px", fontWeight: "bold", textAlign: "center" }}>
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        color: "white",
+        fontSize: "16px",
+        fontWeight: "bold",
+        textAlign: "center"
+      }}>
         <p>{message}</p>
-        <div style={{ width: "200px", height: "10px", background: "rgba(255, 255, 255, 0.2)", borderRadius: "5px", position: "relative", overflow: "hidden", marginBottom: "10px" }}>
-          <div style={{ width: `${progress}%`, height: "100%", background: "white", transition: "width 0.3s" }}></div>
+        <div style={{
+          width: "200px",
+          height: "10px",
+          background: "rgba(255, 255, 255, 0.2)",
+          borderRadius: "5px",
+          position: "relative",
+          overflow: "hidden",
+          marginBottom: "10px"
+        }}>
+          <div style={{
+            width: `${progress}%`,
+            height: "100%",
+            background: "white",
+            transition: "width 0.3s"
+          }}></div>
         </div>
         <p>{Math.round(progress)}% Loaded</p>
       </div>
@@ -45,13 +71,13 @@ function Loader() {
 const PRESET_MAPPINGS = {
   Default: {
     w: '../../public/audios/piano/21.mp3',
-  a: '../../public/audios/piano/33.mp3',
-  s: '../../public/audios/piano/45.mp3',
-  d: '../../public/audios/piano/57.mp3',
-  q: '../../public/audios/piano/69.mp3',
-  e: '../../public/audios/piano/81.mp3',
-  r: '../../public/audios/pianor/93.mp3',
-  t: '../../public/audios/piano/105.mp3'
+    a: '../../public/audios/piano/33.mp3',
+    s: '../../public/audios/piano/45.mp3',
+    d: '../../public/audios/piano/57.mp3',
+    q: '../../public/audios/piano/69.mp3',
+    e: '../../public/audios/piano/81.mp3',
+    r: '../../public/audios/pianor/93.mp3',
+    t: '../../public/audios/piano/105.mp3'
   },
   Alternative: {
     w: '/audios/alternative_bass.mp3',
@@ -62,14 +88,14 @@ const PRESET_MAPPINGS = {
     e: '/audios/alternative_ride.mp3',
     r: '/audios/alternative_floor_tom.mp3',
     t: '/audios/alternative_splash.mp3'
-}
+  }
 };
 
 // DrumsModel loads and plays the GLTF model
 function DrumsModel({ isPlaying }) {
   const { scene, animations } = useGLTF("/piano3d.gltf");
   const { actions } = useAnimations(animations, scene);
-console.log(scene)
+
   useEffect(() => {
     if (actions && animations.length > 0) {
       const action = actions[animations[0].name];
@@ -83,13 +109,17 @@ console.log(scene)
     }
   }, [isPlaying, actions, animations]);
 
-  return <primitive object={scene} scale={23} position={[-0, -2, 0.3]} rotation={[0, 4.35, 0]} />;
-  // used to manipulate the position and rotation of the model
+  return (
+    <primitive
+      object={scene}
+      scale={23}
+      position={[0, -2, 0.3]}
+      rotation={[0, 4.35, 0]}
+    />
+  );
 }
 
 // CanvasBackground updates the scene's background.
-// When a color is selected, it just updates the background.
-// When an image is selected, you could update additional states if needed.
 function CanvasBackground({ bgImage }) {
   const { scene } = useThree();
   
@@ -124,10 +154,7 @@ function DrumComp() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordings, setRecordings] = useState([]);
   const [unsavedRecording, setUnsavedRecording] = useState(null);
-  
-  // Initialize background as a color; user can switch to image via BackgroundPicker.
   const [bgImage, setBgImage] = useState({ type: "color", value: "#000000" });
-  
   const [isPaused, setIsPaused] = useState(false);
   const [isRecordingActive, setIsRecordingActive] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -329,13 +356,102 @@ function DrumComp() {
     }
   };
 
+  // Shepherd.js tour function with revised wording for each step
+  const startTour = () => {
+    const tour = new Shepherd.Tour({
+      defaultStepOptions: {
+        useModalOverlay: true,
+        modalOverlayOpeningPadding: 10,
+        cancelIcon: { enabled: true },
+        classes: "snx-dark-green",
+        scrollTo: { behavior: "smooth", block: "center" }
+      }
+    });
+    
+    tour.addStep({
+      id: "model-step",
+      text: "Welcome to the 3D Piano Showcase! Use your mouse to explore the model.",
+      attachTo: { element: '[data-tour="canvasContainer"]', on: "bottom" },
+      buttons: [{ text: "Next", action: tour.next }]
+    });
+    
+    tour.addStep({
+      id: "rotate-step",
+      text: "Rotate and zoom the view to get a closer look at the piano details.",
+      attachTo: { element: '[data-tour="canvasContainer"]', on: "top" },
+      buttons: [
+        { text: "Back", action: tour.back },
+        { text: "Next", action: tour.next }
+      ]
+    });
+    
+    tour.addStep({
+      id: "preset-step",
+      text: "Select your preferred sound preset from this dropdown.",
+      attachTo: { element: '[data-tour="presetCard"]', on: "bottom" },
+      buttons: [
+        { text: "Back", action: tour.back },
+        { text: "Next", action: tour.next }
+      ]
+    });
+    
+    tour.addStep({
+      id: "background-step",
+      text: "Customize the background to set your mood.",
+      attachTo: { element: '[data-tour="backgroundCard"]', on: "bottom" },
+      buttons: [
+        { text: "Back", action: tour.back },
+        { text: "Next", action: tour.next }
+      ]
+    });
+    
+    tour.addStep({
+      id: "volume-step",
+      text: "Adjust the volume of the piano sounds here.",
+      attachTo: { element: '[data-tour="volumeControls"]', on: "top" },
+      buttons: [
+        { text: "Back", action: tour.back },
+        { text: "Next", action: tour.next }
+      ]
+    });
+    
+    tour.addStep({
+      id: "recording-step",
+      text: "Record your performance with these recording controls.",
+      attachTo: { element: '[data-tour="recordingControls"]', on: "left" },
+      buttons: [
+        { text: "Back", action: tour.back },
+        { text: "Next", action: tour.next }
+      ]
+    });
+    
+    tour.addStep({
+      id: "keymapping-step",
+      text: "Finally, configure your key mappings by clicking the 'Configure Keys' button.",
+      attachTo: { element: '[data-tour="keyMappingButton"]', on: "left" },
+      buttons: [
+        { text: "Back", action: tour.back },
+        { text: "Finish", action: tour.complete }
+      ]
+    });
+    
+    tour.start();
+  };
+   const svgSrc =
+      bgImage &&
+      bgImage.type === "color" &&
+      bgImage.value.toLowerCase() === "#000000"
+        ? metallicaSvgWhite
+        : metallicaSvgDefault;
+
   return (
     <div className={styles.container} onClick={handleUserGesture}>
-      {/* SVG overlay that stays fixed regardless of background changes */}
+      {/* Fixed SVG overlay; update if needed */}
       <div className={styles.svgOverlay}>
-        <img src="/metallica-svg.svg" alt="Overlay SVG" />
-      </div>
-      <div className={styles.canvasContainer}>
+  <img src={svgSrc} alt="Overlay SVG" />
+</div>
+
+      <div className={styles.canvasContainer} data-tour="canvasContainer">
         <Canvas
           className={styles.canvas}
           camera={{
@@ -355,17 +471,16 @@ function DrumComp() {
             <hemisphereLight skyColor={"#aaaaaa"} groundColor={"#222222"} intensity={0.3} position={[0, 50, 0]} />
             <directionalLight position={[5, 5, 5]} intensity={0.8} />
             <DrumsModel isPlaying={isAnimating} />
-            {/* Display the Metallica logo plane */}
             <OrbitControls enableZoom={true} enablePan={true} />
             <Environment preset="sunset" />
           </Suspense>
         </Canvas>
       </div>
-      <div className={styles.controls}>
+      <div className={styles.controls} data-tour="controls">
         <div className={styles.settingsContainer}>
-          <div className={styles.presetCard}>
+          <div className={styles.presetCard} data-tour="presetCard">
             <h4>Keyboard Preset</h4>
-            <label>Presets:</label>
+            <label style={{ color: "white" }}>Presets:</label>
             <select onChange={handlePresetChange} value={keyMapping}>
               {Object.keys(PRESET_MAPPINGS).map((preset) => (
                 <option key={preset} value={preset}>
@@ -374,28 +489,34 @@ function DrumComp() {
               ))}
             </select>
           </div>
-          <div className={styles.backgroundCard}>
-            <h4>Background</h4>
-            {/* BackgroundPicker should update bgImage appropriately */}
+          <div className={styles.backgroundCard} data-tour="backgroundCard">
             <BackgroundPicker setBg={setBgImage} />
           </div>
         </div>
-        <button className={styles.keyMappingButton} onClick={() => setIsKeyMappingOpen(true)}>
+        {/* Tour Button */}
+        <button className={styles.tourButton} onClick={startTour}>
+          Start Tour
+        </button>
+        {/* Key Mapping Button */}
+        <button className={styles.keyMappingButton} onClick={() => setIsKeyMappingOpen(true)} data-tour="keyMappingButton">
           🎹 Configure Keys
         </button>
-        <div className={`${styles.popupKeyMapping} ${isKeyMappingOpen ? styles.show : ""}`}>
-          <button className={styles.closeButton} onClick={() => setIsKeyMappingOpen(false)}>
-            ✖
-          </button>
-          <h3>Key Mapping</h3>
-          <KeyMapping soundMap={keyMappings} updateSoundMap={setKeyMappings} />
-        </div>
-        <div className={styles.volumeControls}>
-          <label>Volume: {Math.round(volume * 100)}%</label>
+        {/* Key Mapping Popup */}
+        {isKeyMappingOpen && (
+          <div className={`${styles.popupKeyMapping} ${isKeyMappingOpen ? styles.show : ""}`}>
+            <button className={styles.closeButton} onClick={() => setIsKeyMappingOpen(false)}>
+              ✖
+            </button>
+            <h3>Key Mapping</h3>
+            <KeyMapping soundMap={keyMappings} updateSoundMap={setKeyMappings} />
+          </div>
+        )}
+        <div className={styles.volumeControls} data-tour="volumeControls">
+        <label style={{ color: "white" }}>Volume: {Math.round(volume * 100)}%</label>
           <button onClick={() => adjustVolume(-0.1)}>🔉 Decrease</button>
           <button onClick={() => adjustVolume(0.1)}>🔊 Increase</button>
         </div>
-        <div className={styles.recordingControls}>
+        <div className={styles.recordingControls} data-tour="recordingControls">
           {isRecording ? (
             <button onClick={pauseRecording} className={isPaused ? styles.triangleButton : styles.pauseButton} title={isPaused ? "Resume Recording" : "Pause Recording"} />
           ) : (
