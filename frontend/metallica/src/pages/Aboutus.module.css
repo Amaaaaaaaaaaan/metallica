@@ -699,7 +699,7 @@ textarea {
 
 /* Footer */
 .footer {
-  padding: 2rem;
+  padding: 2rem 2rem 35px 2rem;
   text-align: center;
   background-color:#141418;
   font-size: 0.9rem;

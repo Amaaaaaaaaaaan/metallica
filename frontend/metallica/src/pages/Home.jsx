@@ -29,35 +29,35 @@ const LandingPage = () => {
     {
       initials: 'JD',
       name: 'Jon Doe',
-      review: 'Designing custom clothes has never been easier!'
+      review: 'Your music project brings creativity and innovation to every track!'
     },
     {
       initials: 'MS',
       name: 'Mark Smith',
-      review: 'The customizer is so easy to use. I love it!'
+      review: 'The sound mixing and design elements of this project are top-notch.'
     },
     {
       initials: 'JA',
       name: 'Jane Doe',
-      review: 'Customizing clothes has never been more fun and easy!'
+      review: 'Every beat feels uniquely crafted, making the experience unforgettable.'
     },
     {
       initials: 'AC',
       name: 'Alice Cooper',
-      review: 'Absolutely fantastic experience with Metallica!'
+      review: 'Absolutely loved the fusion of classic and modern sound techniques!'
     },
     {
       initials: 'BR',
       name: 'Bob Ross',
-      review: 'Brings a creative spark to designing!'
+      review: 'This project inspires creativity and brings music to life with every note.'
     },
     {
       initials: 'EC',
       name: 'Eve Carter',
-      review: 'Truly innovative approach to customization.'
+      review: 'A truly innovative approach to music creation and customization.'
     },
   ];
-
+  
   // State to hold dynamic feedback from localStorage
   const [dynamicFeedbacks, setDynamicFeedbacks] = useState([]);
 
